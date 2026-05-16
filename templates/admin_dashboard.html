@@ -1,0 +1,379 @@
+{% extends "base_clean.html" %}
+{% block title %}Admin Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<!-- Enhanced Welcome Hero -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="background: var(--primary-gradient); color: white; border-radius: 25px;">
+            <div class="card-body py-5">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-4" 
+                                 style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);">
+                                <i class="fas fa-shield-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <h1 class="display-5 fw-bold mb-2">Welcome, Administrator! 🛡️</h1>
+                                <p class="lead mb-0 opacity-90">System Command Center</p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                                <i class="fas fa-shield-check me-2"></i>System Admin
+                            </span>
+                            <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                                <i class="fas fa-server me-2"></i>All Systems Online
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="glass-effect p-4 rounded-4 d-inline-block">
+                            <div class="small opacity-75 mb-1">Admin ID</div>
+                            <div class="fs-4 fw-bold">ADM-{{ range(1000, 9999)|random }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card text-center">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_users|default(0) }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card text-center">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-user-injured"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_patients|default(0) }}</div>
+            <div class="stat-label">Patients</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card text-center">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_doctors|default(0) }}</div>
+            <div class="stat-label">Doctors</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card text-center">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_consultations|default(0) }}</div>
+            <div class="stat-label">Consultations</div>
+        </div>
+    </div>
+</div>
+        <!-- Quick Actions -->
+        <div class="mb-5">
+            <h2 class="fw-bold mb-4">Quick Actions</h2>
+            <div class="dashboard-grid">
+                <!-- Verify Doctors -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+                        <i class="fas fa-user-check text-white"></i>
+                    </div>
+                    <div class="stat-number">Verify</div>
+                    <div class="stat-label mb-3">Doctor Verification</div>
+                    <p class="text-muted small mb-3">Review and approve doctor registrations</p>
+                    <a href="{{ url_for('admin_verify_doctors') }}" class="btn btn-gradient btn-modern w-100">
+                        <i class="fas fa-user-check"></i> Verify Doctors
+                    </a>
+                </div>
+                
+                <!-- Manage Users -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_users|default(0) }}</div>
+                    <div class="stat-label mb-3">Total Users</div>
+                    <p class="text-muted small mb-3">Manage all system users and permissions</p>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-modern w-100" style="background: var(--gradient-info); color: white;">
+                        <i class="fas fa-users"></i> Manage Users
+                    </a>
+                </div>
+                
+                <!-- View Consultations -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-stethoscope text-white"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_consultations|default(0) }}</div>
+                    <div class="stat-label mb-3">Consultations</div>
+                    <p class="text-muted small mb-3">Monitor all system consultations</p>
+                    <a href="{{ url_for('admin_consultations') }}" class="btn btn-modern w-100" style="background: var(--gradient-success); color: white;">
+                        <i class="fas fa-stethoscope"></i> View Consultations
+                    </a>
+                </div>
+                
+                <!-- Generate Reports -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-chart-bar text-white"></i>
+                    </div>
+                    <div class="stat-number">Reports</div>
+                    <div class="stat-label mb-3">System Analytics</div>
+                    <p class="text-muted small mb-3">Generate comprehensive system reports</p>
+                    <a href="{{ url_for('admin_reports') }}" class="btn btn-modern w-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-chart-bar"></i> Generate Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Recent Registrations -->
+                <div class="card-modern mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-user-plus gradient-text me-2"></i>
+                            Recent Registrations
+                        </h3>
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-modern btn-sm">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    {% if recent_users and recent_users|length > 0 %}
+                        <div class="timeline">
+                            {% for user in recent_users[:5] %}
+                                <div class="timeline-item">
+                                    <div class="appointment-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h5 class="fw-bold mb-1">{{ user.name }}</h5>
+                                                <p class="text-muted small mb-0">{{ user.email }}</p>
+                                            </div>
+                                            <span class="badge" style="background: linear-gradient(135deg, {{ '#4facfe' if user.role == 'doctor' else '#10b981' }} 0%, {{ '#00f2fe' if user.role == 'doctor' else '#059669' }} 100%);">
+                                                <i class="fas fa-{{ 'user-md' if user.role == 'doctor' else 'user-injured' }} me-1"></i>
+                                                {{ user.role|capitalize }}
+                                            </span>
+                                        </div>
+                                        <div class="small">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            {{ user.created_at[:10] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-plus fa-4x text-muted mb-3 opacity-50"></i>
+                            <p class="text-muted">No recent registrations</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Recent Consultations -->
+                <div class="card-modern">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-notes-medical gradient-text me-2"></i>
+                            Recent Consultations
+                        </h3>
+                        <a href="{{ url_for('admin_consultations') }}" class="btn btn-modern btn-sm">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    {% if recent_consultations and recent_consultations|length > 0 %}
+                        {% for consult in recent_consultations[:4] %}
+                            <div class="appointment-card mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">{{ consult.patient_name }}</h6>
+                                        <div class="small text-muted mb-2">
+                                            <i class="fas fa-user-md me-1"></i>
+                                            Dr. {{ consult.doctor_name }}
+                                        </div>
+                                        <div class="small">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            {{ consult.consultation_date[:10] }}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge" style="background: linear-gradient(135deg, {{ '#f59e0b' if consult.status == 'pending' else '#10b981' }} 0%, {{ '#d97706' if consult.status == 'pending' else '#059669' }} 100%);">
+                                            <i class="fas fa-{{ 'clock' if consult.status == 'pending' else 'check-circle' }} me-1"></i>
+                                            {{ consult.status|capitalize }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-notes-medical fa-3x text-muted mb-3 opacity-50"></i>
+                            <p class="text-muted">No recent consultations</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Admin Tools -->
+                <div class="card-modern mb-4">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-tools gradient-text me-2"></i>
+                        Admin Tools
+                    </h4>
+                    
+                    <a href="{{ url_for('admin_verify_doctors') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+                                    <i class="fas fa-user-check text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Verify Doctors</div>
+                                    <div class="small text-muted">Review applications</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('admin_users') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Manage Users</div>
+                                    <div class="small text-muted">User management</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('admin_consultations') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <i class="fas fa-stethoscope text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Consultations</div>
+                                    <div class="small text-muted">Monitor activity</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('admin_reports') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                    <i class="fas fa-chart-bar text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Reports</div>
+                                    <div class="small text-muted">Analytics & insights</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('admin_settings') }}" class="d-block text-decoration-none">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                    <i class="fas fa-cog text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Settings</div>
+                                    <div class="small text-muted">System configuration</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- System Status -->
+                <div class="card-modern mb-4">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-server gradient-text me-2"></i>
+                        System Status
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">System Health</span>
+                            <span class="small fw-bold text-success">Excellent</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" style="width: 95%; background: var(--gradient-success);"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">Database Performance</span>
+                            <span class="small fw-bold text-success">Good</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" style="width: 88%; background: var(--gradient-primary);"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">User Activity</span>
+                            <span class="small fw-bold text-primary">High</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" style="width: 92%; background: var(--gradient-info);"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Admin Tip -->
+                <div class="card-modern" style="background: var(--gradient-primary); color: white;">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt fa-3x mb-3" style="opacity: 0.9;"></i>
+                        <h5 class="fw-bold mb-3">Admin Tip</h5>
+                        <p class="mb-0 small" style="opacity: 0.95;">
+                            Regularly review doctor verifications and monitor system performance to ensure optimal user experience.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Action Button -->
+<a href="{{ url_for('admin_verify_doctors') }}" class="fab" title="Verify Doctors">
+    <i class="fas fa-user-check"></i>
+</a>
+{% endblock %}

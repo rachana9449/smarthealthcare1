@@ -1,0 +1,531 @@
+{% extends "base_clean.html" %}
+{% block title %}System Settings{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">
+        <i class="fas fa-cog"></i> System Settings
+    </h2>
+    
+    <!-- System Information -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> System Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-server fa-3x text-primary mb-2"></i>
+                                    <h6>System Status</h6>
+                                    <h4 class="text-success">{{ system_info.status }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-code-branch fa-3x text-info mb-2"></i>
+                                    <h6>Version</h6>
+                                    <h4>{{ system_info.version }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-3x text-success mb-2"></i>
+                                    <h6>Total Users</h6>
+                                    <h4>{{ system_info.total_users }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-database fa-3x text-warning mb-2"></i>
+                                    <h6>Database Size</h6>
+                                    <h4>{{ system_info.db_size }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <button type="button" class="btn btn-primary w-100" onclick="window.location.href='{{ url_for('admin_users') }}'">
+                                <i class="fas fa-users fa-2x mb-2"></i><br>
+                                Manage Users
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button type="button" class="btn btn-info w-100" onclick="window.location.href='{{ url_for('admin_consultations') }}'">
+                                <i class="fas fa-stethoscope fa-2x mb-2"></i><br>
+                                Consultations
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button type="button" class="btn btn-warning w-100" onclick="window.location.href='{{ url_for('admin_reports') }}'">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                                View Reports
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button type="button" class="btn btn-success w-100" onclick="window.location.href='{{ url_for('export_users') }}'">
+                                <i class="fas fa-download fa-2x mb-2"></i><br>
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Application Settings -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-sliders-h"></i> Application Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin_update_settings') }}">
+                        <div class="mb-3">
+                            <label class="form-label">System Name</label>
+                            <input type="text" class="form-control" name="system_name" value="Medical Recommendation System">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" name="admin_email" value="admin@medical.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Consultation Fee Range</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" name="min_fee" value="200" placeholder="Min">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" name="max_fee" value="2000" placeholder="Max">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Appointment Duration (minutes)</label>
+                            <select class="form-select" name="appointment_duration">
+                                <option value="15">15 minutes</option>
+                                <option value="30" selected>30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-bell"></i> Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin_update_notifications') }}">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailNotif" name="email_notif" checked>
+                                <label class="form-check-label" for="emailNotif">
+                                    <strong>Email Notifications</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">Send email notifications to users for appointments and consultations</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="smsNotif" name="sms_notif">
+                                <label class="form-check-label" for="smsNotif">
+                                    <strong>SMS Notifications</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">Send SMS reminders for appointments</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="pushNotif" name="push_notif" checked>
+                                <label class="form-check-label" for="pushNotif">
+                                    <strong>Push Notifications</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">Send in-app push notifications</small>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="adminNotif" name="admin_notif" checked>
+                                <label class="form-check-label" for="adminNotif">
+                                    <strong>Admin Notifications</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">Receive notifications for new registrations and consultations</small>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Save Notification Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Configuration -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Email Configuration (SMTP)</h5>
+                    <small class="opacity-75">Configure SMTP so doctors receive real-time email notifications when appointments are booked</small>
+                </div>
+                <div class="card-body">
+                    {% if email_cfg.username %}
+                    <div class="alert alert-success d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span>Email is configured. Sending from <strong>{{ email_cfg.username }}</strong></span>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning d-flex align-items-center mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span>Email is <strong>not configured</strong>. Doctors will not receive email notifications until you set this up.</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- SMTP Form -->
+                        <div class="col-md-7">
+                            <form method="POST" action="{{ url_for('admin_save_email_config') }}">
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-semibold">SMTP Server</label>
+                                        <input type="text" class="form-control" name="mail_server"
+                                               value="{{ email_cfg.server or 'smtp.gmail.com' }}"
+                                               placeholder="smtp.gmail.com">
+                                        <div class="form-text">Gmail: smtp.gmail.com &nbsp;|&nbsp; Outlook: smtp.office365.com</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Port</label>
+                                        <input type="number" class="form-control" name="mail_port"
+                                               value="{{ email_cfg.port or 587 }}">
+                                        <div class="form-text">TLS: 587 &nbsp;|&nbsp; SSL: 465</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="mailTls" name="mail_use_tls"
+                                               {% if email_cfg.get('use_tls', True) %}checked{% endif %}>
+                                        <label class="form-check-label" for="mailTls">
+                                            <strong>Use TLS (recommended)</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Sender Name</label>
+                                    <input type="text" class="form-control" name="mail_sender_name"
+                                           value="{{ email_cfg.sender_name or 'Medical System' }}"
+                                           placeholder="Medical System">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Gmail / Email Address</label>
+                                    <input type="email" class="form-control" name="mail_username"
+                                           value="{{ email_cfg.username or '' }}"
+                                           placeholder="yourapp@gmail.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">App Password</label>
+                                    <input type="password" class="form-control" name="mail_password"
+                                           placeholder="{% if email_cfg.password %}Leave blank to keep current password{% else %}Enter App Password{% endif %}">
+                                    <div class="form-text">
+                                        For Gmail: <a href="https://myaccount.google.com/apppasswords" target="_blank">Generate an App Password</a>
+                                        (requires 2-Step Verification enabled)
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Email Configuration
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Help + Test -->
+                        <div class="col-md-5">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="fw-bold"><i class="fas fa-paper-plane me-1 text-primary"></i> Test Email</h6>
+                                    <p class="text-muted small">Send a test email to verify your configuration works.</p>
+                                    <div class="input-group mb-2">
+                                        <input type="email" class="form-control form-control-sm" id="testEmailAddr"
+                                               placeholder="recipient@example.com">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="sendTestEmail()">
+                                            <i class="fas fa-paper-plane me-1"></i> Send Test
+                                        </button>
+                                    </div>
+                                    <div id="testEmailResult" class="mt-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-info"><i class="fas fa-info-circle me-1"></i> Gmail Setup Guide</h6>
+                                    <ol class="small text-muted ps-3 mb-0">
+                                        <li>Go to your Google Account → Security</li>
+                                        <li>Enable <strong>2-Step Verification</strong></li>
+                                        <li>Go to <strong>App Passwords</strong></li>
+                                        <li>Select app: <em>Mail</em>, device: <em>Other</em></li>
+                                        <li>Copy the 16-character password</li>
+                                        <li>Paste it in the <strong>App Password</strong> field above</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Management -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-database"></i> Database Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-download fa-3x text-primary mb-3"></i>
+                                    <h6>Backup Database</h6>
+                                    <p class="text-muted small">Create a backup of the entire database</p>
+                                    <button type="button" class="btn btn-primary" onclick="backupDatabase()">
+                                        <i class="fas fa-download"></i> Backup Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-broom fa-3x text-warning mb-3"></i>
+                                    <h6>Clean Old Data</h6>
+                                    <p class="text-muted small">Remove data older than 1 year</p>
+                                    <button type="button" class="btn btn-warning" onclick="cleanOldData()">
+                                        <i class="fas fa-broom"></i> Clean Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-pie fa-3x text-success mb-3"></i>
+                                    <h6>Database Statistics</h6>
+                                    <p class="text-muted small">View detailed database statistics</p>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#dbStatsModal">
+                                        <i class="fas fa-chart-bar"></i> View Stats
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Logs -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Recent System Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Level</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Just now</td>
+                                    <td><span class="badge bg-info">INFO</span></td>
+                                    <td>Admin</td>
+                                    <td>Settings Access</td>
+                                    <td>Accessed system settings page</td>
+                                </tr>
+                                <tr>
+                                    <td>5 mins ago</td>
+                                    <td><span class="badge bg-success">SUCCESS</span></td>
+                                    <td>System</td>
+                                    <td>Database</td>
+                                    <td>Database connection successful</td>
+                                </tr>
+                                <tr>
+                                    <td>10 mins ago</td>
+                                    <td><span class="badge bg-info">INFO</span></td>
+                                    <td>Patient</td>
+                                    <td>Appointment</td>
+                                    <td>New appointment booked</td>
+                                </tr>
+                                <tr>
+                                    <td>15 mins ago</td>
+                                    <td><span class="badge bg-success">SUCCESS</span></td>
+                                    <td>Doctor</td>
+                                    <td>Consultation</td>
+                                    <td>Consultation completed</td>
+                                </tr>
+                                <tr>
+                                    <td>20 mins ago</td>
+                                    <td><span class="badge bg-info">INFO</span></td>
+                                    <td>System</td>
+                                    <td>Notification</td>
+                                    <td>Notification sent to 5 users</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-history"></i> View Full Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Database Stats Modal -->
+<div class="modal fade" id="dbStatsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Database Statistics</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Table Statistics:</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Users</span>
+                                <span class="badge bg-primary">{{ system_info.total_users }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Consultations</span>
+                                <span class="badge bg-success">{{ system_info.total_consultations }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Appointments</span>
+                                <span class="badge bg-info">-</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Medical Records</span>
+                                <span class="badge bg-warning">-</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Database Health:</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>Status:</strong> <span class="badge bg-success">Healthy</span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Size:</strong> {{ system_info.db_size }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Last Backup:</strong> Never
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Connections:</strong> <span class="badge bg-info">Active</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function backupDatabase() {
+    if (confirm('Create a backup of the database? This may take a few moments.')) {
+        alert('Database backup feature will be implemented. For now, manually copy medical.db file.');
+    }
+}
+
+function cleanOldData() {
+    if (confirm('This will permanently delete data older than 1 year. Continue?')) {
+        alert('Data cleaning feature will be implemented in future updates.');
+    }
+}
+
+function sendTestEmail() {
+    var addr = document.getElementById('testEmailAddr').value.trim();
+    var resultDiv = document.getElementById('testEmailResult');
+    if (!addr) {
+        resultDiv.innerHTML = '<div class="alert alert-warning py-2 mb-0 small">Please enter a recipient email address.</div>';
+        return;
+    }
+    resultDiv.innerHTML = '<div class="text-muted small"><i class="fas fa-spinner fa-spin me-1"></i> Sending…</div>';
+
+    var formData = new FormData();
+    formData.append('test_recipient', addr);
+
+    fetch('{{ url_for("admin_test_email") }}', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                resultDiv.innerHTML = '<div class="alert alert-success py-2 mb-0 small"><i class="fas fa-check-circle me-1"></i>' + data.message + '</div>';
+            } else {
+                resultDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0 small"><i class="fas fa-times-circle me-1"></i>' + data.message + '</div>';
+            }
+        })
+        .catch(function(err) {
+            resultDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0 small">Network error: ' + err.message + '</div>';
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,413 @@
+{% extends "base_clean.html" %}
+
+{% block title %}Appointments{% endblock %}
+
+{% block content %}
+<style>
+.appointment-card {
+    border-left: 4px solid #667eea;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.appointment-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.appointment-card.pending {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.appointment-card.confirmed {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+}
+
+.appointment-card.cancelled {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.action-btn {
+    transition: all 0.3s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.patient-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.mode-badge {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mode-online {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.mode-offline {
+    background: #fef3c7;
+    color: #92400e;
+}
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-lg">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h4 class="mb-0"><i class="fas fa-calendar-alt"></i> Patient Appointments</h4>
+            </div>
+            <div class="card-body p-4">
+                {% if appointments %}
+                
+                <!-- Pending Appointments -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-clock text-warning"></i> Pending Appointments (Awaiting Your Confirmation)</h5>
+                    {% set pending_found = false %}
+                    {% for appointment in appointments %}
+                        {% if appointment.status == 'pending' or appointment.status == 'scheduled' %}
+                            {% set pending_found = true %}
+                            <div class="card appointment-card pending">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1 text-center">
+                                            <div class="patient-avatar mx-auto">
+                                                {{ appointment.patient_name[0] }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6 class="mb-1 fw-bold">{{ appointment.patient_name }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-envelope"></i> {{ appointment.patient_email }}
+                                            </p>
+                                            <p class="mb-0 text-muted small">
+                                                <i class="fas fa-phone"></i> {{ appointment.patient_phone }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-1">
+                                                <i class="fas fa-calendar"></i> <strong>{{ appointment.appointment_date }}</strong>
+                                            </p>
+                                            <p class="mb-1">
+                                                <i class="fas fa-clock"></i> {{ appointment.appointment_time }}
+                                            </p>
+                                            <span class="mode-badge {% if appointment.mode == 'online' or appointment.mode == 'video' %}mode-online{% else %}mode-offline{% endif %}">
+                                                <i class="fas fa-{% if appointment.mode == 'online' or appointment.mode == 'video' %}video{% else %}hospital{% endif %}"></i>
+                                                {{ appointment.mode|capitalize if appointment.mode else 'In-Person' }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            {% if appointment.symptoms %}
+                                            <p class="mb-0 small">
+                                                <strong>Symptoms:</strong><br>
+                                                {{ appointment.symptoms[:50] }}...
+                                            </p>
+                                            {% else %}
+                                            <p class="mb-0 text-muted small">{{ appointment.reason[:50] }}...</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <button class="btn btn-success btn-sm action-btn mb-2 w-100" 
+                                                    onclick="acceptAppointment({{ appointment.id }})">
+                                                <i class="fas fa-check"></i> Accept
+                                            </button>
+                                            <button class="btn btn-danger btn-sm action-btn w-100" 
+                                                    onclick="rejectAppointment({{ appointment.id }})">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not pending_found %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No pending appointments
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Confirmed Appointments -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-check-circle text-success"></i> Confirmed Appointments (Ready for Consultation)</h5>
+                    {% set confirmed_found = false %}
+                    {% for appointment in appointments %}
+                        {% if appointment.status == 'confirmed' %}
+                            {% set confirmed_found = true %}
+                            <div class="card appointment-card confirmed">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1 text-center">
+                                            <div class="patient-avatar mx-auto">
+                                                {{ appointment.patient_name[0] }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h6 class="mb-1 fw-bold">{{ appointment.patient_name }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-envelope"></i> {{ appointment.patient_email }}
+                                            </p>
+                                            <p class="mb-0 text-muted small">
+                                                <i class="fas fa-phone"></i> {{ appointment.patient_phone }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="mb-1">
+                                                <i class="fas fa-calendar"></i> <strong>{{ appointment.appointment_date }}</strong>
+                                            </p>
+                                            <p class="mb-1">
+                                                <i class="fas fa-clock"></i> {{ appointment.appointment_time }}
+                                            </p>
+                                            <span class="mode-badge {% if appointment.mode == 'online' or appointment.mode == 'video' %}mode-online{% else %}mode-offline{% endif %}">
+                                                <i class="fas fa-{% if appointment.mode == 'online' or appointment.mode == 'video' %}video{% else %}hospital{% endif %}"></i>
+                                                {{ appointment.mode|capitalize if appointment.mode else 'In-Person' }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <span class="badge {% if appointment.status == 'confirmed' %}bg-success{% else %}bg-primary{% endif %} p-2">
+                                                <i class="fas fa-{% if appointment.status == 'confirmed' %}check-circle{% else %}calendar-check{% endif %}"></i> {{ appointment.status|capitalize }}
+                                            </span>
+                                            <br><br>
+                                            {% if appointment.mode == 'online' or appointment.mode == 'video' %}
+                                            <a href="{{ url_for('video_call', appointment_id=appointment.id) }}"
+                                               class="btn btn-primary btn-sm w-100 mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: bold; padding: 8px;">
+                                                <i class="fas fa-video me-1"></i> Start Consultation
+                                            </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('add_prescription', appointment_id=appointment.id) }}"
+                                               class="btn btn-success btn-sm w-100">
+                                                <i class="fas fa-prescription"></i> Add Prescription
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not confirmed_found %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No confirmed appointments. Accept pending appointments above to confirm them.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Emergency Appointments -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-exclamation-triangle text-danger"></i> Emergency Appointments</h5>
+                    {% set emergency_found = false %}
+                    {% for appointment in appointments %}
+                        {% if appointment.status == 'emergency' %}
+                            {% set emergency_found = true %}
+                            <div class="card appointment-card" style="border-left-color: #ef4444; background: #fef2f2;">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1 text-center">
+                                            <div class="patient-avatar mx-auto" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                                {{ appointment.patient_name[0] }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h6 class="mb-1 fw-bold text-danger">🚨 {{ appointment.patient_name }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-envelope"></i> {{ appointment.patient_email }}
+                                            </p>
+                                            <p class="mb-0 text-muted small">
+                                                <i class="fas fa-phone"></i> {{ appointment.patient_phone }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="mb-1">
+                                                <i class="fas fa-calendar"></i> <strong>{{ appointment.appointment_date }}</strong>
+                                            </p>
+                                            <p class="mb-1">
+                                                <i class="fas fa-clock"></i> {{ appointment.appointment_time }}
+                                            </p>
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-video"></i> Emergency Video Call
+                                            </span>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <span class="badge bg-danger p-2 mb-2">
+                                                <i class="fas fa-exclamation-triangle"></i> EMERGENCY
+                                            </span>
+                                            <br>
+                                            <a href="{{ url_for('video_call', appointment_id=appointment.id) }}"
+                                               class="btn btn-danger btn-sm w-100 mb-2 fw-bold">
+                                                <i class="fas fa-video me-1"></i> 🚨 Join Emergency Call
+                                            </a>
+                                            <a href="{{ url_for('add_prescription', appointment_id=appointment.id) }}"
+                                               class="btn btn-success btn-sm w-100">
+                                                <i class="fas fa-prescription"></i> Add Prescription
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not emergency_found %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No emergency appointments
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Cancelled/Completed -->
+                <div>
+                    <h5 class="mb-3"><i class="fas fa-history text-secondary"></i> Past Appointments</h5>
+                    {% set past_found = false %}
+                    {% for appointment in appointments %}
+                        {% if appointment.status == 'cancelled' or appointment.status == 'completed' %}
+                            {% set past_found = true %}
+                            <div class="card appointment-card cancelled">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-1">{{ appointment.patient_name }}</h6>
+                                            <p class="mb-0 text-muted small">
+                                                {{ appointment.appointment_date }} at {{ appointment.appointment_time }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <span class="badge {% if appointment.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %} p-2">
+                                                {{ appointment.status|capitalize }}
+                                            </span>
+                                            {% if appointment.status == 'completed' and (appointment.prescription or appointment.lab_tests) %}
+                                            <br><br>
+                                            <a href="{{ url_for('add_prescription', appointment_id=appointment.id) }}"
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> View Prescription
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if not past_found %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No past appointments
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h5>No appointments scheduled</h5>
+                    <p class="text-muted">Patients will book appointments with you</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function acceptAppointment(appointmentId) {
+    console.log('[DEBUG] acceptAppointment called with ID:', appointmentId);
+    
+    Swal.fire({
+        title: 'Accept Appointment?',
+        text: 'Confirm this appointment with the patient?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-check"></i> Yes, Accept',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        console.log('[DEBUG] Swal result:', result);
+        if (!result.isConfirmed) return;
+        
+        console.log('[DEBUG] Sending API request...');
+        fetch('/api/appointment/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appointment_id: appointmentId, action: 'accept' })
+        })
+        .then(function(r) {
+            console.log('[DEBUG] Response received:', r.status);
+            if (!r.ok && r.status === 302) { window.location.href = '/signin-as'; return null; }
+            return r.json();
+        })
+        .then(function(data) {
+            console.log('[DEBUG] Response data:', data);
+            
+            if (!data) return;
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success', title: 'Appointment Accepted!',
+                    text: 'Patient has been notified. The appointment has been moved to the Confirmed list below, where you can click Start Consultation.',
+                    confirmButtonColor: '#667eea'
+                }).then(function() { location.reload(); });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Failed to accept appointment' });
+            }
+        })
+        .catch(function(err) {
+            console.error('[DEBUG] Error:', err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed: ' + err.message });
+        });
+    });
+}
+
+function rejectAppointment(appointmentId) {
+    Swal.fire({
+        title: 'Reject Appointment?',
+        text: 'Are you sure you want to reject this appointment?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-times"></i> Yes, Reject',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (!result.isConfirmed) return;
+        fetch('/api/appointment/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appointment_id: appointmentId, action: 'reject' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success', title: 'Appointment Rejected',
+                    text: 'Patient has been notified.',
+                    confirmButtonColor: '#667eea'
+                }).then(function() { location.reload(); });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Failed to reject appointment' });
+            }
+        })
+        .catch(function(err) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed: ' + err.message });
+        });
+    });
+}
+</script>
+{% endblock %}

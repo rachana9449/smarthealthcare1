@@ -1,0 +1,182 @@
+<!-- Enhanced Form Field Tooltips Implementation -->
+<!-- Add this to your form templates for better user guidance -->
+
+<style>
+/* Enhanced Form Field Tooltips */
+.field-tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.field-tooltip {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.field-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #667eea;
+}
+
+.field-tooltip-container:hover .field-tooltip,
+.field-tooltip-container:focus-within .field-tooltip {
+    opacity: 1;
+    visibility: visible;
+    top: -50px;
+}
+
+/* Input field enhancements */
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Validation tooltips */
+.validation-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #dc3545;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    margin-top: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.validation-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.validation-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 10px;
+    border: 4px solid transparent;
+    border-bottom-color: #dc3545;
+}
+</style>
+
+<!-- Example Form Fields with Tooltips -->
+<div class="mb-3">
+    <label for="fullName" class="form-label">
+        Full Name 
+        <span class="field-tooltip-container">
+            <i class="fas fa-info-circle text-muted"></i>
+            <div class="field-tooltip">Enter your complete legal name as per ID</div>
+        </span>
+    </label>
+    <input type="text" class="form-control" id="fullName" name="fullName" required>
+    <div class="validation-tooltip" id="fullNameError"></div>
+</div>
+
+<div class="mb-3">
+    <label for="email" class="form-label">
+        Email Address
+        <span class="field-tooltip-container">
+            <i class="fas fa-info-circle text-muted"></i>
+            <div class="field-tooltip">We'll use this for appointment notifications</div>
+        </span>
+    </label>
+    <input type="email" class="form-control" id="email" name="email" required>
+    <div class="validation-tooltip" id="emailError"></div>
+</div>
+
+<div class="mb-3">
+    <label for="phone" class="form-label">
+        Phone Number
+        <span class="field-tooltip-container">
+            <i class="fas fa-info-circle text-muted"></i>
+            <div class="field-tooltip">Include country code (e.g., +1 234-567-8900)</div>
+        </span>
+    </label>
+    <input type="tel" class="form-control" id="phone" name="phone" required>
+    <div class="validation-tooltip" id="phoneError"></div>
+</div>
+
+<div class="mb-3">
+    <label for="password" class="form-label">
+        Password
+        <span class="field-tooltip-container">
+            <i class="fas fa-info-circle text-muted"></i>
+            <div class="field-tooltip">Min 8 characters, include numbers & symbols</div>
+        </span>
+    </label>
+    <input type="password" class="form-control" id="password" name="password" required>
+    <div class="validation-tooltip" id="passwordError"></div>
+</div>
+
+<script>
+// Enhanced Form Validation with Tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearValidation);
+    });
+    
+    function validateField(e) {
+        const field = e.target;
+        const errorTooltip = document.getElementById(field.id + 'Error');
+        
+        if (!field.value.trim()) {
+            showValidationError(field, errorTooltip, 'This field is required');
+        } else if (field.type === 'email' && !isValidEmail(field.value)) {
+            showValidationError(field, errorTooltip, 'Please enter a valid email address');
+        } else if (field.type === 'password' && field.value.length < 8) {
+            showValidationError(field, errorTooltip, 'Password must be at least 8 characters');
+        } else {
+            clearValidationError(field, errorTooltip);
+        }
+    }
+    
+    function showValidationError(field, tooltip, message) {
+        field.classList.add('is-invalid');
+        tooltip.textContent = message;
+        tooltip.classList.add('show');
+    }
+    
+    function clearValidationError(field, tooltip) {
+        field.classList.remove('is-invalid');
+        tooltip.classList.remove('show');
+    }
+    
+    function clearValidation(e) {
+        const field = e.target;
+        const errorTooltip = document.getElementById(field.id + 'Error');
+        if (field.value.trim()) {
+            clearValidationError(field, errorTooltip);
+        }
+    }
+    
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+});
+</script>

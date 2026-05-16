@@ -1,0 +1,325 @@
+{% extends "base_clean.html" %}
+{% block title %}MediConnect - Your Health, Connected{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-gradient"></div>
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center min-vh-100 py-5">
+            <div class="col-lg-6 text-white">
+                <div class="fade-in">
+                    <h1 class="hero-title">Your Health, <br>Connected</h1>
+                    <p class="hero-subtitle">Experience modern healthcare with AI-powered diagnosis, video consultations, and 24/7 access to certified doctors.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="{{ url_for('signup_as') }}" class="btn btn-gradient btn-modern btn-lg">
+                            <i class="fas fa-rocket"></i> Get Started Free
+                        </a>
+                        <a href="#features" class="btn btn-modern btn-lg" style="background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px);">
+                            <i class="fas fa-play-circle"></i> Learn More
+                        </a>
+                    </div>
+                    <div class="mt-5 d-flex gap-4">
+                        <div>
+                            <div class="fs-3 fw-bold">10K+</div>
+                            <div class="small opacity-75">Happy Patients</div>
+                        </div>
+                        <div>
+                            <div class="fs-3 fw-bold">500+</div>
+                            <div class="small opacity-75">Expert Doctors</div>
+                        </div>
+                        <div>
+                            <div class="fs-3 fw-bold">4.9★</div>
+                            <div class="small opacity-75">Rating</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="slide-up">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" 
+                         alt="Healthcare" 
+                         class="img-fluid rounded-3 shadow-2xl"
+                         style="border-radius: var(--radius-2xl) !important;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-white" id="features">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold gradient-text mb-3">Why Choose MediConnect?</h2>
+            <p class="lead text-muted">Modern healthcare solutions designed for your convenience</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- Feature 1 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+                    <i class="fas fa-brain text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">AI-Powered Diagnosis</h4>
+                <p class="text-muted">Advanced machine learning analyzes your symptoms to provide accurate preliminary assessments in seconds.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                    <i class="fas fa-video text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Video Consultations</h4>
+                <p class="text-muted">Connect with certified doctors from anywhere. Quality healthcare without the waiting room.</p>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-file-medical text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Digital Health Records</h4>
+                <p class="text-muted">Your complete medical history securely stored and accessible anytime, anywhere.</p>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-prescription text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">E-Prescriptions</h4>
+                <p class="text-muted">Digital prescriptions sent directly to your preferred pharmacy with nearby services finder.</p>
+            </div>
+            
+            <!-- Feature 5 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-ambulance text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Emergency Support</h4>
+                <p class="text-muted">24/7 emergency consultation access with immediate doctor response for urgent cases.</p>
+            </div>
+            
+            <!-- Feature 6 -->
+            <div class="card-modern text-center">
+                <div class="stat-icon mx-auto" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                    <i class="fas fa-shield-alt text-white"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Secure & Private</h4>
+                <p class="text-muted">Bank-level encryption ensures your health data is always protected and confidential.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5" style="background: var(--gray-50);">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold gradient-text mb-3">How It Works</h2>
+            <p class="lead text-muted">Get started in 3 simple steps</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-glass text-center h-100">
+                    <div class="display-1 gradient-text fw-bold mb-3">1</div>
+                    <h4 class="fw-bold mb-3">Sign Up</h4>
+                    <p class="text-muted">Create your free account in under 2 minutes. No credit card required.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-glass text-center h-100">
+                    <div class="display-1 gradient-text fw-bold mb-3">2</div>
+                    <h4 class="fw-bold mb-3">Choose Service</h4>
+                    <p class="text-muted">Select from AI diagnosis, doctor consultation, or browse our health services.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-glass text-center h-100">
+                    <div class="display-1 gradient-text fw-bold mb-3">3</div>
+                    <h4 class="fw-bold mb-3">Get Care</h4>
+                    <p class="text-muted">Receive expert medical advice and prescriptions from certified professionals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Showcase -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80" 
+                     alt="AI Diagnosis" 
+                     class="img-fluid rounded-3 shadow-lg">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="display-5 fw-bold mb-4">Smart Symptom Checker</h2>
+                <p class="lead text-muted mb-4">Our AI-powered system analyzes your symptoms using advanced machine learning algorithms trained on millions of medical cases.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Instant preliminary diagnosis</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> 95% accuracy rate</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Doctor recommendations</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Voice input support</li>
+                </ul>
+                <a href="{{ url_for('signup_as') }}" class="btn btn-gradient btn-modern">
+                    Try It Now <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="row align-items-center">
+            <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" 
+                     alt="Video Consultation" 
+                     class="img-fluid rounded-3 shadow-lg">
+            </div>
+            <div class="col-lg-6 order-lg-1">
+                <h2 class="display-5 fw-bold mb-4">Video Consultations</h2>
+                <p class="lead text-muted mb-4">Connect face-to-face with board-certified doctors from the comfort of your home. No travel, no waiting rooms.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> 500+ certified doctors</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> 30+ specializations</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> HD video quality</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Instant prescriptions</li>
+                </ul>
+                <a href="{{ url_for('signup_as') }}" class="btn btn-gradient btn-modern">
+                    Book Consultation <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5" style="background: var(--gradient-primary);">
+    <div class="container py-5">
+        <div class="row text-center text-white">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="display-3 fw-bold mb-2">10K+</div>
+                <div class="fs-5">Happy Patients</div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="display-3 fw-bold mb-2">500+</div>
+                <div class="fs-5">Expert Doctors</div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="display-3 fw-bold mb-2">50K+</div>
+                <div class="fs-5">Consultations</div>
+            </div>
+            <div class="col-md-3">
+                <div class="display-3 fw-bold mb-2">4.9★</div>
+                <div class="fs-5">Average Rating</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold gradient-text mb-3">What Our Patients Say</h2>
+            <p class="lead text-muted">Real stories from real people</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-modern h-100">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-4">"MediConnect made healthcare so convenient! I got a consultation within minutes and received my prescription digitally. Highly recommend!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white me-3" style="width: 48px; height: 48px; background: var(--gradient-primary);">
+                            S
+                        </div>
+                        <div>
+                            <div class="fw-bold">Sarah Johnson</div>
+                            <div class="small text-muted">Patient</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card-modern h-100">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-4">"The AI symptom checker is incredibly accurate. It helped me understand my condition before consulting with a doctor. Amazing technology!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white me-3" style="width: 48px; height: 48px; background: var(--gradient-primary);">
+                            M
+                        </div>
+                        <div>
+                            <div class="fw-bold">Michael Chen</div>
+                            <div class="small text-muted">Patient</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card-modern h-100">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-4">"As a busy professional, MediConnect saves me so much time. No more waiting rooms or taking time off work. Perfect solution!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white me-3" style="width: 48px; height: 48px; background: var(--gradient-primary);">
+                            E
+                        </div>
+                        <div>
+                            <div class="fw-bold">Emily Rodriguez</div>
+                            <div class="small text-muted">Patient</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: var(--gray-50);">
+    <div class="container py-5">
+        <div class="card-glass text-center p-5">
+            <h2 class="display-4 fw-bold gradient-text mb-4">Ready to Transform Your Healthcare?</h2>
+            <p class="lead text-muted mb-4">Join thousands of patients who trust MediConnect for their health needs</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('signup_as') }}" class="btn btn-gradient btn-modern btn-lg">
+                    <i class="fas fa-user-plus"></i> Sign Up Free
+                </a>
+                <a href="{{ url_for('signin_as') }}" class="btn btn-modern btn-lg" style="background: white; color: var(--primary); border: 2px solid var(--primary);">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </a>
+            </div>
+            <p class="text-muted mt-4 mb-0 small">
+                <i class="fas fa-shield-alt me-2"></i>
+                HIPAA Compliant • Bank-Level Security • 24/7 Support
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Action Button -->
+<a href="{{ url_for('signup_as') }}" class="fab" title="Get Started">
+    <i class="fas fa-plus"></i>
+</a>
+{% endblock %}

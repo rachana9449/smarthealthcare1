@@ -1,0 +1,408 @@
+{% extends "base_clean.html" %}
+{% block title %}Possible Conditions{% endblock %}
+{% block content %}
+<style>
+    .symptom-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .symptom-card:hover {
+        border-left-color: #667eea;
+        transform: translateX(5px);
+    }
+    
+    .example-symptom {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .example-symptom:hover {
+        background: #667eea !important;
+        color: white !important;
+        transform: scale(1.05);
+    }
+    
+    .ai-badge {
+        animation: glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 5px #667eea; }
+        50% { box-shadow: 0 0 20px #667eea; }
+    }
+</style>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <div style="width: 100px; height: 100px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+            <i class="fas fa-stethoscope" style="font-size: 50px; color: white;"></i>
+        </div>
+        <h2 class="mt-3" style="color: #333;">
+            <i class="fas fa-diagnoses"></i> AI-Powered Symptom Checker
+        </h2>
+        <p class="text-muted">Describe your symptoms and get instant health insights</p>
+    </div>
+    
+    <div class="card shadow-lg">
+        <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="mb-0"><i class="fas fa-stethoscope"></i> Disease Prediction</h4>
+                <span class="badge bg-light text-dark ai-badge">AI Powered</span>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-info d-flex align-items-center">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+                <div>
+                    <strong>Important Notice:</strong> This is an AI-powered prediction tool for preliminary assessment only. 
+                    <strong>Always consult with a qualified medical professional</strong> for accurate diagnosis and treatment.
+                </div>
+            </div>
+            
+            <form method="POST" id="symptomForm">
+                <div class="mb-4">
+                    <label class="form-label fw-bold" style="font-size: 18px;">
+                        <i class="fas fa-notes-medical"></i> Describe your symptoms in detail:
+                    </label>
+                    <div style="position: relative;">
+                        <textarea class="form-control" name="symptoms" id="symptomsInput" rows="10" 
+                                  style="font-size: 16px; border: 2px solid #e0e0e0; padding-right: 60px;"
+                                  placeholder="Example: I have been experiencing fever for the past 3 days, along with persistent headache, dry cough, body aches, fatigue, sore throat, and runny nose. The fever is around 101°F and gets worse in the evening..." required></textarea>
+                        <button type="button" id="voiceButton" class="btn btn-success" 
+                                style="position: absolute; right: 10px; top: 10px; border-radius: 50%; width: 45px; height: 45px; padding: 0; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
+                                title="Click to use voice input">
+                            <i class="fas fa-microphone" id="micIcon"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb"></i> Be as detailed as possible for better accuracy
+                            <span class="badge bg-success ms-2"><i class="fas fa-microphone"></i> Voice input available</span>
+                        </small>
+                        <small class="text-muted" id="charCount">0 characters</small>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-size: 18px; padding: 15px;">
+                        <i class="fas fa-search"></i> Analyze Symptoms & Predict Conditions
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" onclick="showSymptomHelper()">
+                        <i class="fas fa-question-circle"></i> Need Help Describing Symptoms?
+                    </button>
+                    <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-list-ul"></i> Common Symptoms by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="symptom-card p-3 mb-3 bg-light rounded">
+                                <h6 class="text-primary fw-bold"><i class="fas fa-lungs"></i> Respiratory</h6>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <span class="badge bg-primary example-symptom" onclick="addSymptom('cough')">Cough</span>
+                                    <span class="badge bg-primary example-symptom" onclick="addSymptom('shortness of breath')">Shortness of breath</span>
+                                    <span class="badge bg-primary example-symptom" onclick="addSymptom('chest pain')">Chest pain</span>
+                                    <span class="badge bg-primary example-symptom" onclick="addSymptom('wheezing')">Wheezing</span>
+                                    <span class="badge bg-primary example-symptom" onclick="addSymptom('sore throat')">Sore throat</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="symptom-card p-3 mb-3 bg-light rounded">
+                                <h6 class="text-success fw-bold"><i class="fas fa-thermometer-half"></i> General</h6>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <span class="badge bg-success example-symptom" onclick="addSymptom('fever')">Fever</span>
+                                    <span class="badge bg-success example-symptom" onclick="addSymptom('fatigue')">Fatigue</span>
+                                    <span class="badge bg-success example-symptom" onclick="addSymptom('body ache')">Body ache</span>
+                                    <span class="badge bg-success example-symptom" onclick="addSymptom('headache')">Headache</span>
+                                    <span class="badge bg-success example-symptom" onclick="addSymptom('chills')">Chills</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="symptom-card p-3 mb-3 bg-light rounded">
+                                <h6 class="text-danger fw-bold"><i class="fas fa-stomach"></i> Digestive</h6>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <span class="badge bg-danger example-symptom" onclick="addSymptom('nausea')">Nausea</span>
+                                    <span class="badge bg-danger example-symptom" onclick="addSymptom('vomiting')">Vomiting</span>
+                                    <span class="badge bg-danger example-symptom" onclick="addSymptom('diarrhea')">Diarrhea</span>
+                                    <span class="badge bg-danger example-symptom" onclick="addSymptom('stomach pain')">Stomach pain</span>
+                                    <span class="badge bg-danger example-symptom" onclick="addSymptom('loss of appetite')">Loss of appetite</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="symptom-card p-3 mb-3 bg-light rounded">
+                                <h6 class="text-warning fw-bold"><i class="fas fa-brain"></i> Neurological</h6>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <span class="badge bg-warning example-symptom" onclick="addSymptom('dizziness')">Dizziness</span>
+                                    <span class="badge bg-warning example-symptom" onclick="addSymptom('confusion')">Confusion</span>
+                                    <span class="badge bg-warning example-symptom" onclick="addSymptom('numbness')">Numbness</span>
+                                    <span class="badge bg-warning example-symptom" onclick="addSymptom('weakness')">Weakness</span>
+                                    <span class="badge bg-warning example-symptom" onclick="addSymptom('vision problems')">Vision problems</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-light mt-3">
+                        <i class="fas fa-hand-pointer"></i> <strong>Tip:</strong> Click on any symptom badge above to add it to your description!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ==================== VOICE INPUT FEATURE ====================
+    var recognition = null;
+    var isListening = false;
+    var finalTranscript = '';
+
+    function initVoice() {
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+            var btn = document.getElementById('voiceButton');
+            if (btn) btn.style.display = 'none';
+            return;
+        }
+
+        recognition = new SR();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN';
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            isListening = true;
+            var voiceButton = document.getElementById('voiceButton');
+            var micIcon = document.getElementById('micIcon');
+            if (voiceButton) {
+                voiceButton.classList.remove('btn-success');
+                voiceButton.classList.add('btn-danger');
+                voiceButton.style.animation = 'pulse 1.5s infinite';
+                voiceButton.title = 'Click to stop recording';
+            }
+            if (micIcon) {
+                micIcon.classList.remove('fa-microphone');
+                micIcon.classList.add('fa-stop');
+            }
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: '🎤 Listening...',
+                    text: 'Speak now to describe your symptoms',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        };
+
+        recognition.onresult = function(event) {
+            var interimTranscript = '';
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                var transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            var input = document.getElementById('symptomsInput');
+            if (input) {
+                input.value = finalTranscript + interimTranscript;
+                var cc = document.getElementById('charCount');
+                if (cc) cc.textContent = input.value.length + ' characters';
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            stopListening();
+            var msgs = {
+                'not-allowed': 'Microphone access denied.\nPlease allow microphone in browser settings.',
+                'no-speech': 'No speech detected. Please speak clearly and try again.',
+                'network': 'Network error. Please check your internet connection.',
+                'audio-capture': 'No microphone found. Please connect a microphone.'
+            };
+            var msg = msgs[event.error] || ('Voice error: ' + event.error);
+            if (event.error !== 'aborted' && typeof Swal !== 'undefined') {
+                Swal.fire({ title: 'Voice Input Error', text: msg, icon: 'error', confirmButtonColor: '#667eea' });
+            }
+        };
+
+        recognition.onend = function() {
+            if (isListening) stopListening();
+        };
+
+        var btn = document.getElementById('voiceButton');
+        if (btn) {
+            btn.addEventListener('click', function() {
+                if (isListening) {
+                    stopListening();
+                } else {
+                    startListening();
+                }
+            });
+        }
+    }
+
+    function startListening() {
+        if (!recognition) { alert('Voice input not supported in this browser. Please use Chrome or Edge.'); return; }
+        finalTranscript = document.getElementById('symptomsInput').value || '';
+        try {
+            recognition.start();
+        } catch(e) {
+            console.error('Could not start recognition:', e);
+        }
+    }
+
+    function stopListening() {
+        isListening = false;
+        if (recognition) { try { recognition.stop(); } catch(e) {} }
+        var voiceButton = document.getElementById('voiceButton');
+        var micIcon = document.getElementById('micIcon');
+        if (voiceButton) {
+            voiceButton.classList.remove('btn-danger');
+            voiceButton.classList.add('btn-success');
+            voiceButton.style.animation = '';
+            voiceButton.title = 'Click to use voice input';
+        }
+        if (micIcon) {
+            micIcon.classList.remove('fa-stop');
+            micIcon.classList.add('fa-microphone');
+        }
+        if (finalTranscript.trim() && typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'Voice Input Complete', text: 'Your symptoms have been recorded', icon: 'success', timer: 2000, toast: true, position: 'top-end', showConfirmButton: false });
+        }
+    }
+
+    // Init on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initVoice();
+    });
+
+    // ==================== CHARACTER COUNTER ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        var symptomsInput = document.getElementById('symptomsInput');
+        var charCount = document.getElementById('charCount');
+        if (symptomsInput && charCount) {
+            symptomsInput.addEventListener('input', function() {
+                charCount.textContent = this.value.length + ' characters';
+            });
+        }
+    });
+
+    // ==================== ADD SYMPTOM FUNCTION ====================
+    function addSymptom(symptom) {
+        var symptomsInput = document.getElementById('symptomsInput');
+        var charCount = document.getElementById('charCount');
+        if (!symptomsInput) return;
+        var currentText = symptomsInput.value;
+        symptomsInput.value = currentText.trim() === '' ? 'I have ' + symptom : currentText + ', ' + symptom;
+        symptomsInput.focus();
+        if (charCount) charCount.textContent = symptomsInput.value.length + ' characters';
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: 'Symptom Added', text: symptom + ' added', icon: 'success', timer: 1200, toast: true, position: 'top-end', showConfirmButton: false });
+        }
+    }
+
+    // ==================== SYMPTOM HELPER POPUP ====================
+    function showSymptomHelper() {
+        if (typeof Swal === 'undefined') return;
+        Swal.fire({
+            title: '<strong>How to Describe Your Symptoms</strong>',
+            icon: 'info',
+            html: '<div style="text-align:left"><h6><i class="fas fa-check-circle text-success"></i> Include:</h6><ul><li>When symptoms started (e.g., "3 days ago")</li><li>Severity (mild, moderate, severe)</li><li>Duration (constant, intermittent)</li><li>What makes it better or worse</li><li>Associated symptoms</li></ul><h6><i class="fas fa-lightbulb text-warning"></i> Example:</h6><p class="bg-light p-2 rounded">"I have had a high fever (101°F) for 3 days, along with severe headache, dry cough, body aches, and extreme fatigue."</p></div>',
+            confirmButtonText: 'Got it!',
+            confirmButtonColor: '#667eea',
+            width: '600px'
+        });
+    }
+
+    // ==================== FORM SUBMISSION ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('symptomForm');
+        if (!form) return;
+        form.addEventListener('submit', function(e) {
+            var symptoms = document.getElementById('symptomsInput').value.trim();
+            if (symptoms.length < 20) {
+                e.preventDefault();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ title: 'Too Short', text: 'Please provide more details (at least 20 characters)', icon: 'warning', confirmButtonColor: '#667eea' });
+                } else {
+                    alert('Please provide more details about your symptoms (at least 20 characters)');
+                }
+                return;
+            }
+            var submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+            showAnalysisProgress();
+        });
+    });
+
+    // ==================== ANALYSIS PROGRESS ====================
+    function showAnalysisProgress() {
+        if (typeof Swal === 'undefined') return;
+        var steps = [
+            'Initializing AI Engine...', 'Processing Symptom Data...',
+            'Analyzing Medical Patterns...', 'Matching Disease Database...',
+            'Calculating Confidence Score...', 'Generating Recommendations...'
+        ];
+        var currentStep = 0;
+        Swal.fire({
+            title: '<i class="fas fa-robot"></i> AI Analysis in Progress',
+            html: '<div style="text-align:left;margin:20px 0"><div class="progress mb-3" style="height:25px"><div class="progress-bar progress-bar-striped progress-bar-animated" id="analysisProgress" style="width:0%;background:linear-gradient(135deg,#667eea,#764ba2)"><span id="progressText">0%</span></div></div><div id="currentStep" style="color:#667eea;font-weight:bold"><i class="fas fa-cog fa-spin"></i> Starting...</div></div>',
+            allowOutsideClick: false, allowEscapeKey: false, showConfirmButton: false, width: '500px',
+            didOpen: function() {
+                function update() {
+                    if (currentStep >= steps.length) return;
+                    var pct = Math.round((currentStep + 1) / steps.length * 100);
+                    var bar = document.getElementById('analysisProgress');
+                    var txt = document.getElementById('progressText');
+                    var step = document.getElementById('currentStep');
+                    if (bar) bar.style.width = pct + '%';
+                    if (txt) txt.textContent = pct + '%';
+                    if (step) step.innerHTML = '<i class="fas fa-cog fa-spin"></i> ' + steps[currentStep];
+                    currentStep++;
+                    if (currentStep < steps.length) {
+                        setTimeout(update, 600);
+                    } else {
+                        setTimeout(function() {
+                            if (step) step.innerHTML = '<i class="fas fa-check-circle text-success"></i> Analysis Complete!';
+                        }, 400);
+                    }
+                }
+                setTimeout(update, 300);
+            }
+        });
+    }
+
+    // Pulse animation CSS
+    (function() {
+        var s = document.createElement('style');
+        s.textContent = '@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(239,68,68,.3)}50%{transform:scale(1.1);box-shadow:0 6px 25px rgba(239,68,68,.5)}}';
+        document.head.appendChild(s);
+    })();
+</script>
+{% endblock %}

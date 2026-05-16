@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call – Dr. {{ appointment.doctor_name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Top info bar — slim */
+        #call-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 9999;
+            font-size: 0.82rem;
+            gap: 10px;
+        }
+        #call-bar .info { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        #call-bar .info span { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+        #end-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        #end-btn:hover { background: #dc2626; }
+
+        /* Jitsi fills everything below the bar */
+        #jitsi-container {
+            position: fixed;
+            top: 42px; left: 0; right: 0; bottom: 0;
+        }
+        #jitsi-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Slim top bar -->
+<div id="call-bar">
+    <div class="info">
+        <span><i class="fas fa-video"></i> <strong>Video Consultation</strong></span>
+        <span><i class="fas fa-user-md"></i> Dr. {{ appointment.doctor_name }}</span>
+        <span><i class="fas fa-user"></i> {{ appointment.patient_name }}</span>
+        <span><i class="fas fa-calendar"></i> {{ appointment.appointment_date }} &nbsp;{{ appointment.appointment_time }}</span>
+    </div>
+    <button id="end-btn" onclick="endCall()">
+        <i class="fas fa-phone-slash"></i> End Call
+    </button>
+</div>
+
+<!-- Full-screen Jitsi -->
+<div id="jitsi-container"></div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+var api = null;
+var socket = null;
+var appointmentId = {{ appointment.id }};
+var userRole = '{{ session.get("role", "patient") }}';
+var callEnded = false;
+
+function initializeSocket() {
+    socket = io();
+    
+    // Join video call room for real-time synchronization
+    socket.emit('join_video_call', {
+        appointment_id: appointmentId,
+        role: userRole
+    });
+    
+    // Listen for call ended by other party
+    socket.on('call_ended_by_peer', function(data) {
+        if (!callEnded && data.appointment_id == appointmentId) {
+            callEnded = true;
+            console.log('Call ended by other party:', data.ended_by);
+            
+            // Show notification that other party ended the call
+            showCallEndedNotification(data.ended_by);
+            
+            // End the call on this side too
+            if (api) {
+                try { 
+                    api.executeCommand('hangup'); 
+                } catch(e) {
+                    console.log('Jitsi hangup command failed:', e);
+                }
+            }
+            
+            // Mark consultation as completed (only once)
+            markConsultationCompleted();
+        }
+    });
+    
+    // Listen for user joined notification
+    socket.on('user_joined_call', function(data) {
+        console.log('Other party joined:', data.role);
+        showJoinedNotification(data.role);
+    });
+}
+
+function showCallEndedNotification(endedBy) {
+    // Create a notification overlay
+    var notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        z-index: 10000;
+        text-align: center;
+        font-size: 18px;
+    `;
+    notification.innerHTML = `
+        <i class="fas fa-phone-slash" style="font-size: 24px; color: #ef4444; margin-bottom: 10px;"></i><br>
+        <strong>Call Ended</strong><br>
+        <small>The ${endedBy} ended the video call</small>
+    `;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+function showJoinedNotification(role) {
+    // Create a small notification
+    var notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 60px;
+        right: 20px;
+        background: rgba(34, 197, 94, 0.9);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-size: 14px;
+    `;
+    notification.innerHTML = `<i class="fas fa-user-check"></i> ${role.charAt(0).toUpperCase() + role.slice(1)} joined`;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+function startCall() {
+    var container = document.getElementById('jitsi-container');
+    var options = {
+        roomName:   '{{ room_name }}',
+        width:      '100%',
+        height:     '100%',
+        parentNode: container,
+        userInfo: {
+            displayName: '{{ display_name | e }}'
+        },
+        configOverwrite: {
+            startWithAudioMuted:    false,
+            startWithVideoMuted:    false,
+            enableWelcomePage:      false,
+            prejoinPageEnabled:     false,
+            disableDeepLinking:     true,
+            disableInviteFunctions: true,
+            defaultLanguage:        'en',
+        },
+        interfaceConfigOverwrite: {
+            SHOW_JITSI_WATERMARK:      false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            BRAND_WATERMARK_LINK:      '',
+            HIDE_INVITE_MORE_HEADER:   true,
+            TOOLBAR_BUTTONS: [
+                'microphone', 'camera', 'desktop', 'fullscreen',
+                'fodeviceselection', 'hangup', 'chat',
+                'raisehand', 'tileview', 'select-background', 'settings'
+            ],
+        }
+    };
+
+    api = new JitsiMeetExternalAPI('meet.jit.si', options);
+
+    // Listen for Jitsi's built-in hangup event
+    api.addEventListener('readyToClose', function () {
+        if (!callEnded) {
+            endCall();
+        }
+    });
+    
+    // Listen for when user leaves the conference
+    api.addEventListener('participantLeft', function (participant) {
+        console.log('Participant left:', participant);
+    });
+}
+
+function endCall() {
+    if (callEnded) return; // Prevent multiple calls
+    callEnded = true;
+    
+    console.log('Ending call initiated by:', userRole);
+    
+    // Notify other party via Socket.IO
+    if (socket) {
+        socket.emit('end_video_call', {
+            appointment_id: appointmentId,
+            role: userRole
+        });
+    }
+    
+    // End Jitsi call
+    if (api) {
+        try { 
+            api.executeCommand('hangup'); 
+        } catch(e) {
+            console.log('Jitsi hangup command failed:', e);
+        }
+    }
+    
+    // Mark consultation as completed
+    markConsultationCompleted();
+}
+
+function markConsultationCompleted() {
+    // Send API request to mark consultation as completed
+    fetch('/api/end-consultation/{{ appointment.id }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Consultation marked as completed:', data);
+        setTimeout(() => {
+            goBack();
+        }, 2000); // Give time for notification to show
+    })
+    .catch(error => {
+        console.error('Error marking consultation as completed:', error);
+        setTimeout(() => {
+            goBack();
+        }, 2000);
+    });
+}
+
+function goBack() {
+    if (userRole === 'doctor') {
+        // Ask doctor if they want to add prescription
+        if (confirm('Would you like to add prescription and lab test recommendations for this patient?')) {
+            window.location.href = '/appointment/add-prescription/{{ appointment.id }}';
+        } else {
+            window.location.href = '/doctor/appointments';
+        }
+    } else {
+        window.location.href = '/patient/appointments';
+    }
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSocket();
+    startCall();
+});
+
+// Clean up when page unloads
+window.addEventListener('beforeunload', function() {
+    if (socket && !callEnded) {
+        socket.emit('end_video_call', {
+            appointment_id: appointmentId,
+            role: userRole
+        });
+    }
+});
+</script>
+</body>
+</html>

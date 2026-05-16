@@ -1,0 +1,587 @@
+<!-- Medical Data Tooltips Implementation -->
+<!-- Add this to medical records, prescriptions, and health data pages -->
+
+<style>
+/* Medical Data Tooltips */
+.medical-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    border-bottom: 1px dotted #667eea;
+}
+
+.medical-tooltip-content {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 280px;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.medical-tooltip:hover .medical-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+    bottom: 130%;
+}
+
+.medical-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: rgba(255, 255, 255, 0.98);
+}
+
+/* Medical Term Definitions */
+.medical-definition {
+    margin-bottom: 12px;
+}
+
+.medical-term {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.medical-description {
+    color: #666;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.medical-category {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+/* Medication Tooltips */
+.medication-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.medication-info {
+    background: #f8f9ff;
+    border-left: 4px solid #667eea;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.medication-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.medication-details {
+    font-size: 12px;
+    color: #666;
+}
+
+.dosage-info {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    margin: 4px 0;
+}
+
+.side-effects {
+    background: #fef3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+.side-effects-title {
+    font-weight: 600;
+    color: #856404;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.side-effects-list {
+    font-size: 10px;
+    color: #856404;
+    line-height: 1.4;
+}
+
+/* Lab Results Tooltips */
+.lab-result-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.lab-value {
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.lab-value.normal {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.lab-value.high {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.lab-value.low {
+    background: #fef3cd;
+    color: #92400e;
+}
+
+.lab-reference {
+    font-size: 10px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.lab-trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.trend-arrow {
+    font-size: 12px;
+}
+
+.trend-arrow.up {
+    color: #ef4444;
+}
+
+.trend-arrow.down {
+    color: #10b981;
+}
+
+.trend-arrow.stable {
+    color: #6b7280;
+}
+
+/* Vital Signs Tooltips */
+.vital-sign {
+    position: relative;
+    display: inline-block;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    margin: 4px;
+    cursor: help;
+}
+
+.vital-value {
+    font-weight: 700;
+    font-size: 18px;
+    color: #333;
+}
+
+.vital-unit {
+    font-size: 12px;
+    color: #666;
+    margin-left: 2px;
+}
+
+.vital-status {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.vital-status.normal {
+    background: #10b981;
+}
+
+.vital-status.warning {
+    background: #f59e0b;
+}
+
+.vital-status.critical {
+    background: #ef4444;
+    animation: pulse 1s infinite;
+}
+
+/* Symptom Severity Tooltips */
+.symptom-severity {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.symptom-severity.mild {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.symptom-severity.moderate {
+    background: #fef3cd;
+    color: #92400e;
+}
+
+.symptom-severity.severe {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.severity-dots {
+    display: flex;
+    gap: 2px;
+}
+
+.severity-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+.severity-dot.active {
+    opacity: 1;
+}
+</style>
+
+<!-- Example Medical Data Elements with Tooltips -->
+
+<!-- Medical Terms with Definitions -->
+<div class="medical-record-section">
+    <h5>Diagnosis</h5>
+    <p>Patient presents with 
+        <span class="medical-tooltip">
+            hypertension
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Cardiovascular</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Hypertension (High Blood Pressure)</div>
+                    <div class="medical-description">
+                        A condition where blood pressure in the arteries is persistently elevated. 
+                        Normal BP is typically below 120/80 mmHg. Hypertension is diagnosed when 
+                        readings consistently exceed 140/90 mmHg.
+                    </div>
+                </div>
+                <div class="medical-description">
+                    <strong>Risk Factors:</strong> Age, family history, obesity, high sodium intake, 
+                    lack of physical activity, excessive alcohol consumption.
+                </div>
+            </div>
+        </span>
+        and mild 
+        <span class="medical-tooltip">
+            tachycardia
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Cardiac Rhythm</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Tachycardia</div>
+                    <div class="medical-description">
+                        A heart rate that exceeds the normal resting rate. In adults, 
+                        tachycardia is typically defined as a heart rate greater than 100 beats per minute.
+                    </div>
+                </div>
+                <div class="medical-description">
+                    <strong>Normal Range:</strong> 60-100 bpm at rest<br>
+                    <strong>Mild Tachycardia:</strong> 100-120 bpm<br>
+                    <strong>Moderate:</strong> 120-150 bpm<br>
+                    <strong>Severe:</strong> >150 bpm
+                </div>
+            </div>
+        </span>
+    </p>
+</div>
+
+<!-- Medications with Detailed Info -->
+<div class="medication-section">
+    <h5>Current Medications</h5>
+    <div class="medication-tooltip">
+        <div class="medication-info">
+            <div class="medication-name">Lisinopril</div>
+            <div class="dosage-info">10mg once daily</div>
+            <div class="medication-details">ACE Inhibitor for blood pressure control</div>
+        </div>
+        <div class="medical-tooltip-content">
+            <div class="medical-category">ACE Inhibitor</div>
+            <div class="medical-definition">
+                <div class="medical-term">Lisinopril (Prinivil, Zestril)</div>
+                <div class="medical-description">
+                    An angiotensin-converting enzyme (ACE) inhibitor used to treat high blood pressure 
+                    and heart failure. Works by relaxing blood vessels to lower blood pressure.
+                </div>
+            </div>
+            <div class="side-effects">
+                <div class="side-effects-title">Common Side Effects:</div>
+                <div class="side-effects-list">
+                    Dry cough, dizziness, headache, fatigue, nausea. 
+                    Contact doctor if experiencing swelling of face/lips/tongue.
+                </div>
+            </div>
+            <div class="medical-description" style="margin-top: 8px;">
+                <strong>Take with:</strong> Can be taken with or without food<br>
+                <strong>Avoid:</strong> Potassium supplements, salt substitutes
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lab Results with Reference Ranges -->
+<div class="lab-results-section">
+    <h5>Recent Lab Results</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="lab-result-tooltip">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Blood Glucose</span>
+                    <span class="lab-value normal">95 mg/dL</span>
+                </div>
+                <div class="medical-tooltip-content">
+                    <div class="medical-category">Blood Chemistry</div>
+                    <div class="medical-definition">
+                        <div class="medical-term">Fasting Blood Glucose</div>
+                        <div class="medical-description">
+                            Measures the amount of glucose (sugar) in blood after fasting for 8-12 hours. 
+                            Used to screen for and monitor diabetes.
+                        </div>
+                    </div>
+                    <div class="lab-reference">
+                        <strong>Reference Ranges:</strong><br>
+                        Normal: 70-99 mg/dL<br>
+                        Prediabetes: 100-125 mg/dL<br>
+                        Diabetes: ≥126 mg/dL
+                    </div>
+                    <div class="lab-trend">
+                        <span class="trend-arrow stable">→</span>
+                        <span style="font-size: 11px; color: #666;">Stable from last test</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="lab-result-tooltip">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Cholesterol (Total)</span>
+                    <span class="lab-value high">245 mg/dL</span>
+                </div>
+                <div class="medical-tooltip-content">
+                    <div class="medical-category">Lipid Panel</div>
+                    <div class="medical-definition">
+                        <div class="medical-term">Total Cholesterol</div>
+                        <div class="medical-description">
+                            Measures the total amount of cholesterol in blood. High levels increase 
+                            risk of heart disease and stroke.
+                        </div>
+                    </div>
+                    <div class="lab-reference">
+                        <strong>Reference Ranges:</strong><br>
+                        Desirable: <200 mg/dL<br>
+                        Borderline High: 200-239 mg/dL<br>
+                        High: ≥240 mg/dL
+                    </div>
+                    <div class="lab-trend">
+                        <span class="trend-arrow up">↑</span>
+                        <span style="font-size: 11px; color: #ef4444;">+15 mg/dL from last test</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vital Signs with Status Indicators -->
+<div class="vital-signs-section">
+    <h5>Current Vital Signs</h5>
+    <div class="d-flex flex-wrap gap-2">
+        <div class="vital-sign medical-tooltip">
+            <div class="vital-value">142<span class="vital-unit">/89</span></div>
+            <div style="font-size: 12px; color: #666;">Blood Pressure</div>
+            <div class="vital-status warning"></div>
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Vital Signs</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Blood Pressure: 142/89 mmHg</div>
+                    <div class="medical-description">
+                        Systolic (142) over Diastolic (89) pressure. This reading indicates 
+                        Stage 1 Hypertension requiring monitoring and possible treatment.
+                    </div>
+                </div>
+                <div class="lab-reference">
+                    <strong>BP Categories:</strong><br>
+                    Normal: <120/80 mmHg<br>
+                    Elevated: 120-129/<80 mmHg<br>
+                    Stage 1 HTN: 130-139/80-89 mmHg<br>
+                    Stage 2 HTN: ≥140/90 mmHg
+                </div>
+            </div>
+        </div>
+        
+        <div class="vital-sign medical-tooltip">
+            <div class="vital-value">98.6<span class="vital-unit">°F</span></div>
+            <div style="font-size: 12px; color: #666;">Temperature</div>
+            <div class="vital-status normal"></div>
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Vital Signs</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Body Temperature: 98.6°F (37°C)</div>
+                    <div class="medical-description">
+                        Normal body temperature. Indicates no fever or hypothermia.
+                    </div>
+                </div>
+                <div class="lab-reference">
+                    <strong>Temperature Ranges:</strong><br>
+                    Normal: 97.0-99.0°F (36.1-37.2°C)<br>
+                    Low-grade fever: 99.1-100.4°F<br>
+                    Fever: >100.4°F (38°C)<br>
+                    High fever: >103°F (39.4°C)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Symptom Severity Indicators -->
+<div class="symptoms-section">
+    <h5>Reported Symptoms</h5>
+    <div class="d-flex flex-wrap gap-2">
+        <div class="symptom-severity mild medical-tooltip">
+            <span>Headache</span>
+            <div class="severity-dots">
+                <div class="severity-dot active"></div>
+                <div class="severity-dot"></div>
+                <div class="severity-dot"></div>
+            </div>
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Symptom Assessment</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Mild Headache (1/3 severity)</div>
+                    <div class="medical-description">
+                        Low-intensity headache that doesn't significantly interfere with daily activities. 
+                        May be tension-type or related to stress, dehydration, or eye strain.
+                    </div>
+                </div>
+                <div class="medical-description">
+                    <strong>Management:</strong> Rest, hydration, over-the-counter pain relievers if needed. 
+                    Monitor for worsening or additional symptoms.
+                </div>
+            </div>
+        </div>
+        
+        <div class="symptom-severity moderate medical-tooltip">
+            <span>Fatigue</span>
+            <div class="severity-dots">
+                <div class="severity-dot active"></div>
+                <div class="severity-dot active"></div>
+                <div class="severity-dot"></div>
+            </div>
+            <div class="medical-tooltip-content">
+                <div class="medical-category">Symptom Assessment</div>
+                <div class="medical-definition">
+                    <div class="medical-term">Moderate Fatigue (2/3 severity)</div>
+                    <div class="medical-description">
+                        Noticeable tiredness that may interfere with some daily activities. 
+                        Could be related to sleep quality, stress, medication side effects, or underlying conditions.
+                    </div>
+                </div>
+                <div class="medical-description">
+                    <strong>Consider:</strong> Sleep hygiene, stress management, medication review. 
+                    Persistent fatigue may warrant further evaluation.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced medical tooltip positioning and interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent tooltips from going off-screen
+    document.querySelectorAll('.medical-tooltip').forEach(tooltip => {
+        tooltip.addEventListener('mouseenter', function() {
+            const tooltipContent = this.querySelector('.medical-tooltip-content');
+            const rect = tooltipContent.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Horizontal positioning
+            if (rect.right > viewportWidth - 20) {
+                tooltipContent.style.left = 'auto';
+                tooltipContent.style.right = '0';
+                tooltipContent.style.transform = 'translateX(0)';
+            } else if (rect.left < 20) {
+                tooltipContent.style.left = '0';
+                tooltipContent.style.right = 'auto';
+                tooltipContent.style.transform = 'translateX(0)';
+            }
+            
+            // Vertical positioning
+            if (rect.top < 20) {
+                tooltipContent.style.bottom = 'auto';
+                tooltipContent.style.top = '125%';
+            }
+        });
+        
+        tooltip.addEventListener('mouseleave', function() {
+            const tooltipContent = this.querySelector('.medical-tooltip-content');
+            // Reset positioning
+            tooltipContent.style.left = '50%';
+            tooltipContent.style.right = 'auto';
+            tooltipContent.style.top = 'auto';
+            tooltipContent.style.bottom = '125%';
+            tooltipContent.style.transform = 'translateX(-50%)';
+        });
+    });
+    
+    // Add click-to-copy functionality for medical values
+    document.querySelectorAll('.lab-value, .vital-value').forEach(element => {
+        element.style.cursor = 'pointer';
+        element.title = 'Click to copy value';
+        
+        element.addEventListener('click', function() {
+            const text = this.textContent.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                // Show brief feedback
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                }, 1000);
+            });
+        });
+    });
+});
+</script>

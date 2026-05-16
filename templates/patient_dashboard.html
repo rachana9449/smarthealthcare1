@@ -1,0 +1,670 @@
+﻿{% extends "base_clean.html" %}
+{% block title %}Patient Dashboard - MediConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== PATIENT DASHBOARD - SELF-CONTAINED STYLES ===== */
+body { background: #f0f2f8 !important; }
+
+/* --- Page wrapper --- */
+.dash-wrap { padding: 28px 0 60px; }
+
+/* --- Hero banner --- */
+.hero-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 36px 40px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(102,126,234,.38);
+}
+.hero-card::before {
+  content:'';
+  position:absolute; right:-80px; top:-80px;
+  width:280px; height:280px;
+  background:rgba(255,255,255,.08);
+  border-radius:50%;
+}
+.hero-card::after {
+  content:'';
+  position:absolute; right:60px; bottom:-70px;
+  width:180px; height:180px;
+  background:rgba(255,255,255,.05);
+  border-radius:50%;
+}
+.hero-card h1 { font-size:2rem; font-weight:800; margin-bottom:6px; font-family:'Poppins',sans-serif; }
+.hero-card p  { font-size:.95rem; opacity:.88; margin-bottom:18px; }
+.hero-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:50px; padding:5px 16px;
+  font-size:.78rem; font-weight:600; margin-right:8px;
+}
+.hero-score-box {
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:16px; padding:16px 24px;
+  text-align:center; display:inline-block;
+}
+.hero-score-box .lbl { font-size:.7rem; opacity:.75; margin-bottom:4px; text-transform:uppercase; letter-spacing:.6px; }
+.hero-score-box .val { font-size:2rem; font-weight:800; letter-spacing:.5px; }
+.hero-score-box .sub { font-size:.7rem; opacity:.7; margin-top:2px; }
+
+/* --- Stats bar --- */
+.stats-bar {
+  background:#fff;
+  border-radius:16px;
+  padding:22px 32px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06);
+  margin-bottom:28px;
+  display:flex; align-items:center;
+}
+.stats-bar .si {
+  flex:1; text-align:center;
+  padding:0 16px;
+  border-right:1px solid #eef0f6;
+}
+.stats-bar .si:last-child { border-right:none; }
+.stats-bar .si .n {
+  font-size:2rem; font-weight:800;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; line-height:1.1;
+}
+.stats-bar .si .l {
+  font-size:.7rem; color:#94a3b8; font-weight:600;
+  text-transform:uppercase; letter-spacing:.6px; margin-top:4px;
+}
+
+/* --- Section heading --- */
+.sec-head {
+  font-size:1.05rem; font-weight:800; color:#1e293b;
+  margin-bottom:16px; display:flex; align-items:center; gap:8px;
+}
+.sec-head i { color:#667eea; }
+
+/* --- Quick Action cards --- */
+.ac-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:32px;
+}
+@media(max-width:992px){ .ac-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:576px){ .ac-grid{ grid-template-columns:1fr 1fr; } }
+
+.ac {
+  background:#fff;
+  border-radius:18px;
+  padding:24px 20px 20px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06);
+  border:1px solid #f1f5f9;
+  display:flex; flex-direction:column;
+  transition:transform .22s ease, box-shadow .22s ease;
+  position:relative; overflow:hidden;
+}
+.ac::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:3px;
+  border-radius:18px 18px 0 0;
+}
+.ac:hover { transform:translateY(-5px); box-shadow:0 14px 40px rgba(0,0,0,.12); }
+
+.ac .icon-wrap {
+  width:54px; height:54px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; color:#fff; margin-bottom:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.ac .val {
+  font-size:2.2rem; font-weight:800;
+  font-family:'Poppins',sans-serif; line-height:1;
+  margin-bottom:2px;
+}
+.ac .lbl {
+  font-size:.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.8px; color:#94a3b8; margin-bottom:8px;
+}
+.ac .desc {
+  font-size:.8rem; color:#64748b; line-height:1.45;
+  flex-grow:1; margin-bottom:14px;
+}
+.ac .ac-btn {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 14px; border-radius:10px; border:none;
+  font-size:.78rem; font-weight:700; color:#fff;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.4px;
+  transition:opacity .2s, transform .2s;
+}
+.ac .ac-btn:hover { opacity:.88; color:#fff; transform:translateY(-1px); }
+
+.ac-purple::before { background:linear-gradient(90deg,#667eea,#764ba2); }
+.ac-purple .val    { background:linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-purple .ac-btn { background:linear-gradient(135deg,#667eea,#764ba2); box-shadow:0 4px 14px rgba(102,126,234,.4); }
+
+.ac-cyan::before { background:linear-gradient(90deg,#06b6d4,#3b82f6); }
+.ac-cyan .val    { background:linear-gradient(135deg,#06b6d4,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-cyan .ac-btn { background:linear-gradient(135deg,#06b6d4,#3b82f6); box-shadow:0 4px 14px rgba(6,182,212,.4); }
+
+.ac-green::before { background:linear-gradient(90deg,#10b981,#059669); }
+.ac-green .val    { background:linear-gradient(135deg,#10b981,#059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-green .ac-btn { background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 4px 14px rgba(16,185,129,.4); }
+
+.ac-red::before { background:linear-gradient(90deg,#ef4444,#dc2626); }
+.ac-red .val    { background:linear-gradient(135deg,#ef4444,#dc2626); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-red .ac-btn { background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 4px 14px rgba(239,68,68,.4); }
+
+/* ── Card watermark icons ── */
+.ac-wm {
+  position:absolute; right:-12px; bottom:-12px;
+  font-size:96px; line-height:1;
+  pointer-events:none; z-index:0;
+  transition:transform .35s ease;
+}
+.ac:hover .ac-wm { transform:scale(1.1) rotate(-6deg); }
+.ac-purple .ac-wm { color:rgba(102,126,234,.09); }
+.ac-cyan   .ac-wm { color:rgba(6,182,212,.09); }
+.ac-green  .ac-wm { color:rgba(16,185,129,.09); }
+.ac-red    .ac-wm { color:rgba(239,68,68,.09); }
+
+/* Keep card content above watermark */
+.ac .icon-wrap, .ac .val, .ac .lbl, .ac .desc, .ac .ac-btn { position:relative; z-index:1; }
+
+/* --- Panel card --- */
+.panel {
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06);
+  border:1px solid #f1f5f9;
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.panel-hd {
+  padding:16px 24px;
+  border-bottom:1px solid #f1f5f9;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.panel-hd h5 {
+  font-size:.95rem; font-weight:800; margin:0; color:#1e293b;
+  display:flex; align-items:center; gap:8px;
+}
+.panel-hd h5 i { color:#667eea; }
+.panel-hd .va {
+  font-size:.78rem; font-weight:700; color:#667eea;
+  text-decoration:none; display:flex; align-items:center; gap:4px;
+  padding:5px 12px; border-radius:8px; background:#f0f2ff;
+  transition:background .2s;
+}
+.panel-hd .va:hover { background:#e0e4ff; color:#764ba2; }
+.panel-bd { padding:20px 24px; }
+
+/* --- Timeline appointment rows --- */
+.timeline-list {
+  position:relative;
+  padding-left:28px;
+}
+.timeline-list::before {
+  content:'';
+  position:absolute; left:10px; top:8px; bottom:8px;
+  width:2px;
+  background:linear-gradient(180deg,#667eea,#764ba2);
+  border-radius:2px;
+}
+.tl-item {
+  position:relative;
+  padding:0 0 22px 20px;
+}
+.tl-item:last-child { padding-bottom:0; }
+.tl-item::before {
+  content:'';
+  position:absolute; left:-18px; top:14px;
+  width:12px; height:12px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  border-radius:50%;
+  border:2px solid #fff;
+  box-shadow:0 0 0 2px #667eea;
+}
+.tl-card {
+  background:#f8faff;
+  border:1px solid #e8ecff;
+  border-radius:14px;
+  padding:16px 18px;
+  transition:box-shadow .2s, transform .2s;
+}
+.tl-card:hover { box-shadow:0 6px 24px rgba(102,126,234,.12); transform:translateY(-2px); }
+
+.tl-top {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:8px;
+}
+.tl-name { font-size:.92rem; font-weight:700; color:#1e293b; }
+.tl-time {
+  font-size:.78rem; font-weight:600; color:#667eea;
+  display:flex; align-items:center; gap:4px;
+  white-space:nowrap;
+}
+.tl-badges { display:flex; align-items:center; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.mode-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; padding:3px 10px; border-radius:20px;
+}
+.mode-online    { background:#dbeafe; color:#2563eb; }
+.mode-emergency { background:#fee2e2; color:#dc2626; }
+.mode-in-person { background:#d1fae5; color:#059669; }
+.mode-video     { background:#ede9fe; color:#7c3aed; }
+.tl-date-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:#f0f2ff; color:#667eea;
+  font-size:.72rem; font-weight:700;
+  padding:3px 10px; border-radius:20px;
+  margin-bottom:6px;
+}
+.tl-reason { font-size:.8rem; color:#64748b; line-height:1.45; margin-bottom:12px; }
+.tl-actions { display:flex; gap:8px; }
+.btn-consult {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:9px 14px; border-radius:10px; border:none;
+  background:linear-gradient(135deg,#667eea,#f5576c);
+  color:#fff; font-size:.78rem; font-weight:700;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.4px;
+  transition:opacity .2s, transform .2s;
+  box-shadow:0 4px 14px rgba(102,126,234,.35);
+}
+.btn-consult:hover { opacity:.88; color:#fff; transform:translateY(-1px); }
+.btn-details {
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:9px 16px; border-radius:10px;
+  border:1.5px solid #667eea; background:transparent;
+  color:#667eea; font-size:.78rem; font-weight:700;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.4px;
+  transition:background .2s, color .2s;
+}
+.btn-details:hover { background:#667eea; color:#fff; }
+
+/* --- Recent consultations list --- */
+.rc-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid #f8fafc;
+}
+.rc-item:last-child { border-bottom:none; padding-bottom:0; }
+.rc-av {
+  width:42px; height:42px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:.9rem; flex-shrink:0;
+  background:linear-gradient(135deg,#10b981,#059669);
+  box-shadow:0 3px 10px rgba(16,185,129,.3);
+}
+.rc-info .name { font-size:.88rem; font-weight:700; color:#1e293b; }
+.rc-info .meta { font-size:.74rem; color:#94a3b8; margin-top:2px; }
+.rc-right { margin-left:auto; text-align:right; flex-shrink:0; }
+.rc-right .date { font-size:.78rem; font-weight:600; color:#667eea; }
+.rc-right .rx-link {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:.72rem; font-weight:700; color:#10b981;
+  text-decoration:none; margin-top:4px;
+  padding:2px 8px; border-radius:6px; background:#d1fae5;
+  transition:background .2s;
+}
+.rc-right .rx-link:hover { background:#a7f3d0; color:#059669; }
+.sbadge {
+  display:inline-block; font-size:.62rem; font-weight:700;
+  padding:3px 8px; border-radius:20px; text-transform:uppercase;
+  letter-spacing:.4px; margin-top:4px;
+}
+.sb-completed { background:#d1fae5; color:#059669; }
+.sb-pending   { background:#fef3c7; color:#d97706; }
+.sb-emergency { background:#fee2e2; color:#dc2626; }
+.sb-confirmed { background:#dbeafe; color:#2563eb; }
+.sb-scheduled { background:#dbeafe; color:#2563eb; }
+
+/* --- Empty state --- */
+.empty {
+  text-align:center; padding:36px 16px; color:#94a3b8;
+}
+.empty i { font-size:3rem; opacity:.25; display:block; margin-bottom:12px; }
+.empty p { font-size:.86rem; margin:0 0 4px; font-weight:600; color:#64748b; }
+.empty small { font-size:.75rem; }
+
+/* --- Sidebar: floating circle tool buttons --- */
+.tools-panel {
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06);
+  border:1px solid #f1f5f9;
+  padding:22px 18px;
+  margin-bottom:20px;
+}
+.tools-panel .sec-head { margin-bottom:16px; }
+.circle-tools {
+  display:flex; justify-content:space-around; align-items:center;
+  flex-wrap:wrap; gap:10px;
+}
+.ct-btn {
+  position:relative;
+  width:52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:1.1rem;
+  text-decoration:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+  transition:transform .2s, box-shadow .2s;
+  flex-shrink:0;
+}
+.ct-btn:hover { transform:translateY(-4px) scale(1.08); box-shadow:0 8px 24px rgba(0,0,0,.2); color:#fff; }
+.ct-btn .ct-tip {
+  position:absolute; bottom:calc(100% + 8px); left:50%;
+  transform:translateX(-50%);
+  background:rgba(30,41,59,.92); color:#fff;
+  font-size:.68rem; font-weight:600; white-space:nowrap;
+  padding:4px 10px; border-radius:6px;
+  opacity:0; visibility:hidden;
+  transition:opacity .2s, visibility .2s;
+  pointer-events:none; z-index:100;
+}
+.ct-btn .ct-tip::after {
+  content:'';
+  position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:4px solid transparent;
+  border-top-color:rgba(30,41,59,.92);
+}
+.ct-btn:hover .ct-tip { opacity:1; visibility:visible; }
+
+/* --- Tip card --- */
+.tip-card {
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  border-radius:18px; padding:24px 20px;
+  color:#fff; text-align:center;
+  box-shadow:0 6px 24px rgba(102,126,234,.35);
+}
+.tip-card i { font-size:2rem; opacity:.85; display:block; margin-bottom:10px; }
+.tip-card h6 { font-size:.95rem; font-weight:800; margin-bottom:8px; }
+.tip-card p  { font-size:.8rem; opacity:.9; line-height:1.55; margin:0; }
+
+@media(max-width:768px){
+  .hero-card { padding:24px 20px; }
+  .hero-card h1 { font-size:1.5rem; }
+  .stats-bar { flex-wrap:wrap; gap:12px; padding:16px 20px; }
+  .stats-bar .si { border-right:none; min-width:40%; }
+  .ac-grid { grid-template-columns:1fr 1fr; }
+  .tl-actions { flex-direction:column; }
+  .btn-consult, .btn-details { width:100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+<div class="container-fluid px-4">
+
+  <!-- Hero Banner -->
+  <div class="hero-card">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1>Welcome back, {{ session.name }}! &#x1F44B;</h1>
+        <p>Your personal health dashboard &bull; Stay on top of your wellbeing</p>
+        <div>
+          <span class="hero-pill"><i class="fas fa-heartbeat"></i> Active Patient</span>
+          <span class="hero-pill"><i class="fas fa-shield-alt"></i> Secure &amp; Private</span>
+          <span class="hero-pill"><i class="fas fa-star"></i> MediConnect</span>
+        </div>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="hero-score-box">
+          <div class="lbl">Health Score</div>
+          <div class="val">&#x2764;&#xFE0F; 92</div>
+          <div class="sub">Excellent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="si">
+      <div class="n">{{ upcoming_count|default(0) }}</div>
+      <div class="l">Upcoming</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ total_consultations|default(0) }}</div>
+      <div class="l">Consultations</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ prescriptions_count|default(0) }}</div>
+      <div class="l">Prescriptions</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ records_count|default(0) }}</div>
+      <div class="l">Records</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="sec-head"><i class="fas fa-bolt"></i> Quick Actions</div>
+  <div class="ac-grid">
+
+    <!-- AI Symptom Analysis -->
+    <div class="ac ac-purple">
+      <i class="fas fa-brain ac-wm"></i>
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+        <i class="fas fa-brain"></i>
+      </div>
+      <div class="val">AI</div>
+      <div class="lbl">Symptom Analysis</div>
+      <div class="desc">Get instant AI-powered disease prediction based on your symptoms</div>
+      <a href="{{ url_for('possible_conditions') }}" class="ac-btn">
+        <i class="fas fa-search"></i> Check Symptoms
+      </a>
+    </div>
+
+    <!-- Expert Doctors -->
+    <div class="ac ac-cyan">
+      <i class="fas fa-user-md ac-wm"></i>
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <div class="val">500+</div>
+      <div class="lbl">Expert Doctors</div>
+      <div class="desc">Browse certified medical professionals across all specializations</div>
+      <a href="{{ url_for('consult_doctor') }}" class="ac-btn">
+        <i class="fas fa-stethoscope"></i> Find Doctors
+      </a>
+    </div>
+
+    <!-- Book Appointment -->
+    <div class="ac ac-green">
+      <i class="fas fa-hospital ac-wm"></i>
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#10b981,#059669);">
+        <i class="fas fa-calendar-plus"></i>
+      </div>
+      <div class="val">24/7</div>
+      <div class="lbl">Available</div>
+      <div class="desc">Schedule appointments at your convenience, any time of day</div>
+      <a href="{{ url_for('consult_doctor') }}" class="ac-btn">
+        <i class="fas fa-calendar-check"></i> Book Now
+      </a>
+    </div>
+
+    <!-- Emergency -->
+    <div class="ac ac-red">
+      <i class="fas fa-ambulance ac-wm"></i>
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+        <i class="fas fa-ambulance"></i>
+      </div>
+      <div class="val">SOS</div>
+      <div class="lbl">Emergency</div>
+      <div class="desc">Immediate medical assistance for urgent and critical cases</div>
+      <a href="{{ url_for('emergency') }}" class="ac-btn">
+        <i class="fas fa-exclamation-triangle"></i> Emergency
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Main Grid -->
+  <div class="row g-4">
+
+    <!-- Left Column -->
+    <div class="col-lg-8">
+
+      <!-- Upcoming Appointments (timeline) -->
+      <div class="panel">
+        <div class="panel-hd">
+          <h5><i class="fas fa-calendar-week"></i> Upcoming Appointments</h5>
+          <a href="{{ url_for('patient_appointments') }}" class="va">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="panel-bd">
+          {% if upcoming_appointments and upcoming_appointments|length > 0 %}
+          <div class="timeline-list">
+            {% for apt in upcoming_appointments %}
+            <div class="tl-item">
+              <div class="tl-card">
+                <div class="tl-top">
+                  <div class="tl-name">Dr. {{ apt.doctor_name }}</div>
+                  <div class="tl-time">
+                    <i class="fas fa-clock"></i> {{ apt.time }}
+                  </div>
+                </div>
+                <div class="tl-badges">
+                  <span class="tl-date-badge"><i class="fas fa-calendar"></i> {{ apt.date }}</span>
+                  {% set m = apt.mode|default('online')|lower %}
+                  {% if m == 'emergency' %}
+                    <span class="mode-badge mode-emergency"><i class="fas fa-exclamation-triangle"></i> EMERGENCY</span>
+                  {% elif m == 'video' %}
+                    <span class="mode-badge mode-video"><i class="fas fa-video"></i> VIDEO</span>
+                  {% elif m == 'in-person' or m == 'in_person' %}
+                    <span class="mode-badge mode-in-person"><i class="fas fa-hospital"></i> IN-PERSON</span>
+                  {% else %}
+                    <span class="mode-badge mode-online"><i class="fas fa-wifi"></i> ONLINE</span>
+                  {% endif %}
+                  {% if apt.status %}
+                    <span class="sbadge sb-{{ apt.status|lower }}">{{ apt.status }}</span>
+                  {% endif %}
+                </div>
+                {% if apt.reason %}
+                <div class="tl-reason"><i class="fas fa-notes-medical" style="color:#94a3b8;margin-right:5px;"></i>{{ apt.reason[:80] }}{% if apt.reason|length > 80 %}...{% endif %}</div>
+                {% endif %}
+                <div class="tl-actions">
+                  <a href="{{ url_for('video_call', appointment_id=apt.id) }}" class="btn-consult">
+                    <i class="fas fa-video"></i> Join Video Call
+                  </a>
+                  <a href="{{ url_for('patient_appointments') }}" class="btn-details">
+                    <i class="fas fa-info-circle"></i> Details
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty">
+            <i class="fas fa-calendar-plus"></i>
+            <p>No upcoming appointments</p>
+            <small>Book an appointment with a doctor to get started</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Consultations -->
+      <div class="panel">
+        <div class="panel-hd">
+          <h5><i class="fas fa-history"></i> Recent Consultations</h5>
+          <a href="{{ url_for('consultation_history') }}" class="va">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="panel-bd">
+          {% if recent_consultations and recent_consultations|length > 0 %}
+            {% for c in recent_consultations %}
+            <div class="rc-item">
+              <div class="rc-av"><i class="fas fa-user-md"></i></div>
+              <div class="rc-info">
+                <div class="name">Dr. {{ c.doctor_name }}</div>
+                <div class="meta">{{ c.specialization|default('General Physician') }}</div>
+              </div>
+              <div class="rc-right">
+                <div class="date">{{ c.date[:10] if c.date else '' }}</div>
+                <span class="sbadge sb-completed">Completed</span>
+                {% if c.prescription %}
+                <br>
+                <a href="{{ url_for('view_prescription', appointment_id=c.id) }}" class="rx-link">
+                  <i class="fas fa-prescription-bottle-alt"></i> View Rx
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty">
+            <i class="fas fa-clipboard-list"></i>
+            <p>No recent consultations</p>
+            <small>Your completed consultations will appear here</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div><!-- /col-lg-8 -->
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+
+      <!-- Health Services: floating circle icon buttons -->
+      <div class="tools-panel">
+        <div class="sec-head"><i class="fas fa-heartbeat"></i> Health Services</div>
+        <div class="circle-tools">
+
+          <!-- Medical Records - purple/pink -->
+          <a href="{{ url_for('patient_medical_records') }}" class="ct-btn"
+             style="background:linear-gradient(135deg,#667eea,#764ba2); box-shadow:0 4px 14px rgba(102,126,234,.45);">
+            <i class="fas fa-folder-open"></i>
+            <span class="ct-tip">Medical Records</span>
+          </a>
+
+          <!-- All Appointments - cyan/blue -->
+          <a href="{{ url_for('patient_appointments') }}" class="ct-btn"
+             style="background:linear-gradient(135deg,#06b6d4,#3b82f6); box-shadow:0 4px 14px rgba(6,182,212,.45);">
+            <i class="fas fa-calendar"></i>
+            <span class="ct-tip">All Appointments</span>
+          </a>
+
+          <!-- Full History - green -->
+          <a href="{{ url_for('consultation_history') }}" class="ct-btn"
+             style="background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 4px 14px rgba(16,185,129,.45);">
+            <i class="fas fa-history"></i>
+            <span class="ct-tip">Full History</span>
+          </a>
+
+          <!-- My Profile - amber -->
+          <a href="{{ url_for('patient_profile') }}" class="ct-btn"
+             style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 14px rgba(245,158,11,.45);">
+            <i class="fas fa-user"></i>
+            <span class="ct-tip">My Profile</span>
+          </a>
+
+          <!-- Emergency - red -->
+          <a href="{{ url_for('emergency') }}" class="ct-btn"
+             style="background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 4px 14px rgba(239,68,68,.45);">
+            <i class="fas fa-ambulance"></i>
+            <span class="ct-tip">Emergency</span>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Health Tip Card -->
+      <div class="tip-card">
+        <i class="fas fa-lightbulb"></i>
+        <h6>Health Tip of the Day</h6>
+        <p>Drink at least 8 glasses of water daily. Staying well-hydrated supports kidney function, boosts energy levels, and helps maintain healthy skin. Start your morning with a full glass!</p>
+      </div>
+
+    </div><!-- /col-lg-4 -->
+
+  </div><!-- /row -->
+
+</div><!-- /container-fluid -->
+</div><!-- /dash-wrap -->
+{% endblock %}

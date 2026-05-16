@@ -1,0 +1,448 @@
+{% extends "base_clean.html" %}
+{% block title %}Admin Dashboard - MediConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: #f0f2f8 !important; }
+.dash-wrap { padding: 28px 0 60px; }
+
+/* Hero */
+.hero-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px; padding: 36px 40px; color: #fff;
+  position: relative; overflow: hidden; margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(30,41,59,.4);
+}
+.hero-card::before {
+  content:''; position:absolute; right:-80px; top:-80px;
+  width:280px; height:280px; background:rgba(255,255,255,.05); border-radius:50%;
+}
+.hero-card::after {
+  content:''; position:absolute; right:60px; bottom:-70px;
+  width:180px; height:180px; background:rgba(255,255,255,.04); border-radius:50%;
+}
+.hero-card h1 { font-size:2rem; font-weight:800; margin-bottom:6px; font-family:'Poppins',sans-serif; }
+.hero-card p  { font-size:.95rem; opacity:.85; margin-bottom:18px; }
+.hero-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:50px; padding:5px 16px; font-size:.78rem; font-weight:600; margin-right:8px;
+}
+.hero-id-box {
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+  border-radius:16px; padding:16px 24px; text-align:center; display:inline-block;
+}
+.hero-id-box .lbl { font-size:.7rem; opacity:.7; margin-bottom:4px; text-transform:uppercase; letter-spacing:.6px; }
+.hero-id-box .val { font-size:1.2rem; font-weight:800; letter-spacing:.5px; }
+
+/* Stats bar */
+.stats-bar {
+  background:#fff; border-radius:16px; padding:22px 32px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06); margin-bottom:28px;
+  display:flex; align-items:center;
+}
+.stats-bar .si { flex:1; text-align:center; padding:0 16px; border-right:1px solid #eef0f6; }
+.stats-bar .si:last-child { border-right:none; }
+.stats-bar .si .n {
+  font-size:2rem; font-weight:800; font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.1;
+}
+.stats-bar .si .l { font-size:.7rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-top:4px; }
+
+/* Section heading */
+.sec-head { font-size:1.05rem; font-weight:800; color:#1e293b; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.sec-head i { color:#667eea; }
+
+/* Action cards grid */
+.ac-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+@media(max-width:992px){ .ac-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:576px){ .ac-grid{ grid-template-columns:1fr 1fr; } }
+
+.ac {
+  background:#fff; border-radius:18px; padding:24px 20px 20px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06); border:1px solid #f1f5f9;
+  display:flex; flex-direction:column;
+  transition:transform .22s ease, box-shadow .22s ease;
+  position:relative; overflow:hidden;
+}
+.ac::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:18px 18px 0 0; }
+.ac:hover { transform:translateY(-5px); box-shadow:0 14px 40px rgba(0,0,0,.12); }
+.ac .icon-wrap {
+  width:54px; height:54px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; color:#fff; margin-bottom:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.ac .val { font-size:2.2rem; font-weight:800; font-family:'Poppins',sans-serif; line-height:1; margin-bottom:2px; }
+.ac .lbl { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#94a3b8; margin-bottom:8px; }
+.ac .desc { font-size:.8rem; color:#64748b; line-height:1.45; flex-grow:1; margin-bottom:14px; }
+.ac .ac-btn {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 14px; border-radius:10px; border:none;
+  font-size:.78rem; font-weight:700; color:#fff;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.4px;
+  transition:opacity .2s, transform .2s;
+}
+.ac .ac-btn:hover { opacity:.88; color:#fff; transform:translateY(-1px); }
+
+.ac-purple::before { background:linear-gradient(90deg,#8b5cf6,#ec4899); }
+.ac-purple .val    { background:linear-gradient(135deg,#8b5cf6,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-purple .ac-btn { background:linear-gradient(135deg,#8b5cf6,#ec4899); box-shadow:0 4px 14px rgba(139,92,246,.4); }
+
+.ac-cyan::before { background:linear-gradient(90deg,#06b6d4,#3b82f6); }
+.ac-cyan .val    { background:linear-gradient(135deg,#06b6d4,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-cyan .ac-btn { background:linear-gradient(135deg,#06b6d4,#3b82f6); box-shadow:0 4px 14px rgba(6,182,212,.4); }
+
+.ac-green::before { background:linear-gradient(90deg,#10b981,#059669); }
+.ac-green .val    { background:linear-gradient(135deg,#10b981,#059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-green .ac-btn { background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 4px 14px rgba(16,185,129,.4); }
+
+.ac-amber::before { background:linear-gradient(90deg,#f59e0b,#d97706); }
+.ac-amber .val    { background:linear-gradient(135deg,#f59e0b,#d97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.ac-amber .ac-btn { background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 14px rgba(245,158,11,.4); }
+
+/* Panel */
+.panel { background:#fff; border-radius:18px; box-shadow:0 2px 16px rgba(0,0,0,.06); border:1px solid #f1f5f9; overflow:hidden; margin-bottom:22px; }
+.panel-hd { padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; justify-content:space-between; }
+.panel-hd h5 { font-size:.95rem; font-weight:800; margin:0; color:#1e293b; display:flex; align-items:center; gap:8px; }
+.panel-hd h5 i { color:#667eea; }
+.panel-hd .va {
+  font-size:.78rem; font-weight:700; color:#667eea;
+  text-decoration:none; display:flex; align-items:center; gap:4px;
+  padding:5px 12px; border-radius:8px; background:#f0f2ff; transition:background .2s;
+}
+.panel-hd .va:hover { background:#e0e4ff; color:#764ba2; }
+.panel-bd { padding:20px 24px; }
+
+/* List rows */
+.list-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid #f8fafc;
+}
+.list-row:last-child { border-bottom:none; padding-bottom:0; }
+.list-av {
+  width:42px; height:42px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:.9rem; flex-shrink:0;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+}
+.list-info .name { font-size:.88rem; font-weight:700; color:#1e293b; }
+.list-info .meta { font-size:.74rem; color:#94a3b8; margin-top:2px; }
+.list-right { margin-left:auto; text-align:right; flex-shrink:0; }
+.list-right .date { font-size:.78rem; font-weight:600; color:#667eea; }
+.sbadge {
+  display:inline-block; font-size:.62rem; font-weight:700;
+  padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.4px; margin-top:4px;
+}
+.sb-doctor    { background:#ede9fe; color:#7c3aed; }
+.sb-patient   { background:#d1fae5; color:#059669; }
+.sb-pending   { background:#fef3c7; color:#d97706; }
+.sb-completed { background:#d1fae5; color:#059669; }
+.sb-admin     { background:#fee2e2; color:#dc2626; }
+
+/* Empty state */
+.empty { text-align:center; padding:36px 16px; color:#94a3b8; }
+.empty i { font-size:3rem; opacity:.25; display:block; margin-bottom:12px; }
+.empty p { font-size:.86rem; margin:0; font-weight:600; color:#64748b; }
+
+/* Tools sidebar */
+.tools-panel { background:#fff; border-radius:18px; box-shadow:0 2px 16px rgba(0,0,0,.06); border:1px solid #f1f5f9; padding:22px 18px; margin-bottom:20px; }
+.tl { display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; text-decoration:none; transition:background .18s; margin-bottom:4px; }
+.tl:hover { background:#f4f6fb; }
+.tl .ti { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.85rem; flex-shrink:0; box-shadow:0 3px 10px rgba(0,0,0,.12); }
+.tl .tt .tn { font-size:.86rem; font-weight:700; color:#1e293b; }
+.tl .tt .ts { font-size:.72rem; color:#94a3b8; }
+.tl .ta { margin-left:auto; color:#d1d5db; font-size:.72rem; }
+
+/* System status */
+.status-panel { background:#fff; border-radius:18px; box-shadow:0 2px 16px rgba(0,0,0,.06); border:1px solid #f1f5f9; padding:22px 20px; margin-bottom:20px; }
+.perf-item { margin-bottom:16px; }
+.perf-item:last-child { margin-bottom:0; }
+.perf-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.perf-label span:first-child { font-size:.82rem; font-weight:600; color:#374151; }
+.perf-label span:last-child  { font-size:.82rem; font-weight:700; }
+.perf-bar { height:8px; background:#f1f5f9; border-radius:10px; overflow:hidden; }
+.perf-fill { height:100%; border-radius:10px; }
+
+/* Tip card */
+.tip-card { background:linear-gradient(135deg,#1e293b 0%,#334155 100%); border-radius:18px; padding:24px 20px; color:#fff; text-align:center; box-shadow:0 6px 24px rgba(30,41,59,.35); }
+.tip-card i { font-size:2rem; opacity:.85; display:block; margin-bottom:10px; }
+.tip-card h6 { font-size:.95rem; font-weight:800; margin-bottom:8px; }
+.tip-card p  { font-size:.8rem; opacity:.85; line-height:1.55; margin:0; }
+
+@media(max-width:768px){
+  .hero-card { padding:24px 20px; }
+  .hero-card h1 { font-size:1.5rem; }
+  .stats-bar { flex-wrap:wrap; gap:12px; padding:16px 20px; }
+  .stats-bar .si { border-right:none; min-width:40%; }
+  .ac-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+<div class="container-fluid px-4">
+
+  <!-- Hero -->
+  <div class="hero-card">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1>Welcome, Administrator! &#x1F6E1;&#xFE0F;</h1>
+        <p>System Command Center &bull; All systems operational</p>
+        <div>
+          <span class="hero-pill"><i class="fas fa-shield-alt"></i> System Admin</span>
+          <span class="hero-pill"><i class="fas fa-server"></i> All Systems Online</span>
+          <span class="hero-pill"><i class="fas fa-lock"></i> Secure Access</span>
+        </div>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="hero-id-box">
+          <div class="lbl">Admin Panel</div>
+          <div class="val">MediConnect</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="si">
+      <div class="n">{{ stats.total_users|default(0) }}</div>
+      <div class="l">Total Users</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ stats.total_patients|default(0) }}</div>
+      <div class="l">Patients</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ stats.total_doctors|default(0) }}</div>
+      <div class="l">Doctors</div>
+    </div>
+    <div class="si">
+      <div class="n">{{ stats.total_consultations|default(0) }}</div>
+      <div class="l">Consultations</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="sec-head"><i class="fas fa-bolt"></i> Quick Actions</div>
+  <div class="ac-grid">
+
+    <!-- Verify Doctors -->
+    <div class="ac ac-purple">
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="val" style="font-size:1.4rem;background:linear-gradient(135deg,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        <i class="fas fa-shield-check"></i> Verify
+      </div>
+      <div class="lbl">Doctor Verification</div>
+      <div class="desc">Review and approve pending doctor registrations</div>
+      <a href="{{ url_for('admin_verify_doctors') }}" class="ac-btn">
+        <i class="fas fa-user-check"></i> Verify Doctors
+      </a>
+    </div>
+
+    <!-- Manage Users -->
+    <div class="ac ac-cyan">
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="val">{{ stats.total_users|default(0) }}</div>
+      <div class="lbl">Total Users</div>
+      <div class="desc">Manage all system users and their permissions</div>
+      <a href="{{ url_for('admin_users') }}" class="ac-btn">
+        <i class="fas fa-users"></i> Manage Users
+      </a>
+    </div>
+
+    <!-- Consultations -->
+    <div class="ac ac-green">
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#10b981,#059669);">
+        <i class="fas fa-stethoscope"></i>
+      </div>
+      <div class="val">{{ stats.total_consultations|default(0) }}</div>
+      <div class="lbl">Consultations</div>
+      <div class="desc">Monitor and oversee all system consultations</div>
+      <a href="{{ url_for('admin_consultations') }}" class="ac-btn">
+        <i class="fas fa-stethoscope"></i> View All
+      </a>
+    </div>
+
+    <!-- Reports -->
+    <div class="ac ac-amber">
+      <div class="icon-wrap" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="val" style="font-size:1.4rem;background:linear-gradient(135deg,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        <i class="fas fa-chart-line"></i> Reports
+      </div>
+      <div class="lbl">System Analytics</div>
+      <div class="desc">Generate comprehensive system reports and insights</div>
+      <a href="{{ url_for('admin_reports') }}" class="ac-btn">
+        <i class="fas fa-chart-bar"></i> Generate Reports
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Main Grid -->
+  <div class="row g-4">
+
+    <!-- Left Column -->
+    <div class="col-lg-8">
+
+      <!-- Recent Registrations -->
+      <div class="panel">
+        <div class="panel-hd">
+          <h5><i class="fas fa-user-plus"></i> Recent Registrations</h5>
+          <a href="{{ url_for('admin_users') }}" class="va">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="panel-bd">
+          {% if recent_users and recent_users|length > 0 %}
+            {% for user in recent_users[:5] %}
+            <div class="list-row">
+              <div class="list-av" style="background:linear-gradient(135deg,{% if user.role=='doctor' %}#06b6d4,#3b82f6{% elif user.role=='admin' %}#ef4444,#dc2626{% else %}#10b981,#059669{% endif %});">
+                <i class="fas fa-{% if user.role=='doctor' %}user-md{% elif user.role=='admin' %}shield-alt{% else %}user{% endif %}"></i>
+              </div>
+              <div class="list-info">
+                <div class="name">{{ user.name }}</div>
+                <div class="meta">{{ user.email }}</div>
+              </div>
+              <div class="list-right">
+                <div class="date">{{ user.created_at[:10] if user.created_at else '' }}</div>
+                <span class="sbadge sb-{{ user.role|lower }}">{{ user.role|capitalize }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty">
+            <i class="fas fa-user-plus"></i>
+            <p>No recent registrations</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Consultations -->
+      <div class="panel">
+        <div class="panel-hd">
+          <h5><i class="fas fa-notes-medical"></i> Recent Consultations</h5>
+          <a href="{{ url_for('admin_consultations') }}" class="va">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="panel-bd">
+          {% if recent_consultations and recent_consultations|length > 0 %}
+            {% for c in recent_consultations[:5] %}
+            <div class="list-row">
+              <div class="list-av" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                <i class="fas fa-stethoscope"></i>
+              </div>
+              <div class="list-info">
+                <div class="name">{{ c.patient_name }}</div>
+                <div class="meta"><i class="fas fa-user-md me-1" style="color:#667eea;"></i>Dr. {{ c.doctor_name }}</div>
+              </div>
+              <div class="list-right">
+                <div class="date">{{ c.consultation_date[:10] if c.consultation_date else '' }}</div>
+                <span class="sbadge sb-{{ c.status|lower }}">{{ c.status|capitalize }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty">
+            <i class="fas fa-notes-medical"></i>
+            <p>No recent consultations</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+
+      <!-- Admin Tools -->
+      <div class="tools-panel">
+        <div class="sec-head" style="margin-bottom:12px;"><i class="fas fa-tools"></i> Admin Tools</div>
+
+        <a href="{{ url_for('admin_verify_doctors') }}" class="tl">
+          <div class="ti" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);"><i class="fas fa-user-check"></i></div>
+          <div class="tt"><div class="tn">Verify Doctors</div><div class="ts">Review applications</div></div>
+          <i class="fas fa-chevron-right ta"></i>
+        </a>
+        <a href="{{ url_for('admin_users') }}" class="tl">
+          <div class="ti" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);"><i class="fas fa-users"></i></div>
+          <div class="tt"><div class="tn">Manage Users</div><div class="ts">User management</div></div>
+          <i class="fas fa-chevron-right ta"></i>
+        </a>
+        <a href="{{ url_for('admin_consultations') }}" class="tl">
+          <div class="ti" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-stethoscope"></i></div>
+          <div class="tt"><div class="tn">Consultations</div><div class="ts">Monitor activity</div></div>
+          <i class="fas fa-chevron-right ta"></i>
+        </a>
+        <a href="{{ url_for('admin_reports') }}" class="tl">
+          <div class="ti" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-chart-bar"></i></div>
+          <div class="tt"><div class="tn">Reports</div><div class="ts">Analytics &amp; insights</div></div>
+          <i class="fas fa-chevron-right ta"></i>
+        </a>
+        <a href="{{ url_for('admin_settings') }}" class="tl">
+          <div class="ti" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><i class="fas fa-cog"></i></div>
+          <div class="tt"><div class="tn">Settings</div><div class="ts">System configuration</div></div>
+          <i class="fas fa-chevron-right ta"></i>
+        </a>
+      </div>
+
+      <!-- System Status -->
+      <div class="status-panel">
+        <div class="sec-head" style="margin-bottom:18px;"><i class="fas fa-server"></i> System Status</div>
+
+        <div class="perf-item">
+          <div class="perf-label">
+            <span>System Health</span>
+            <span style="color:#10b981;">Excellent</span>
+          </div>
+          <div class="perf-bar">
+            <div class="perf-fill" style="width:95%;background:linear-gradient(90deg,#10b981,#059669);"></div>
+          </div>
+        </div>
+
+        <div class="perf-item">
+          <div class="perf-label">
+            <span>Database Performance</span>
+            <span style="color:#667eea;">Good</span>
+          </div>
+          <div class="perf-bar">
+            <div class="perf-fill" style="width:88%;background:linear-gradient(90deg,#667eea,#764ba2);"></div>
+          </div>
+        </div>
+
+        <div class="perf-item">
+          <div class="perf-label">
+            <span>User Activity</span>
+            <span style="color:#06b6d4;">High</span>
+          </div>
+          <div class="perf-bar">
+            <div class="perf-fill" style="width:92%;background:linear-gradient(90deg,#06b6d4,#3b82f6);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Tip -->
+      <div class="tip-card">
+        <i class="fas fa-shield-alt"></i>
+        <h6>Admin Tip</h6>
+        <p>Regularly review doctor verifications and monitor system performance to ensure optimal user experience across the platform.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="{{ url_for('admin_verify_doctors') }}" class="fab" title="Verify Doctors" style="position:fixed;bottom:30px;right:30px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 6px 24px rgba(102,126,234,.5);text-decoration:none;z-index:999;transition:transform .2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  <i class="fas fa-user-check"></i>
+</a>
+{% endblock %}

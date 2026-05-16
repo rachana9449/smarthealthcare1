@@ -1,0 +1,220 @@
+{% extends "base_clean.html" %}
+{% block title %}Enhanced Layout - MediConnect{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card glass-effect text-center py-5">
+            <div class="card-body">
+                <div class="floating">
+                    <i class="fas fa-heart fa-4x text-danger mb-4"></i>
+                </div>
+                <h1 class="display-3 gradient-text mb-4">
+                    MediConnect Enhanced
+                </h1>
+                <p class="lead mb-4 text-muted">
+                    Experience the future of healthcare management with our beautifully enhanced interface
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <span class="badge bg-success">✨ Modern Design</span>
+                    <span class="badge bg-info">📱 Responsive</span>
+                    <span class="badge bg-warning">🚀 Fast Performance</span>
+                    <span class="badge bg-danger">💎 Premium Quality</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="stat-value">150+</div>
+            <div class="stat-label">Doctors</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: var(--success-gradient);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">2.5K+</div>
+            <div class="stat-label">Patients</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: var(--warning-gradient);">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-value">5K+</div>
+            <div class="stat-label">Appointments</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: var(--danger-gradient);">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-value">4.9★</div>
+            <div class="stat-label">Rating</div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Access Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-md me-2"></i>
+                    Doctor Dashboard
+                </h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="text-muted mb-4">
+                    Comprehensive medical practice management with AI-powered insights, patient consultations, and appointment scheduling.
+                </p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">Features:</small>
+                        <span class="badge bg-primary">Premium</span>
+                    </div>
+                    <ul class="list-unstyled small mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i>Patient Management</li>
+                        <li><i class="fas fa-check text-success me-2"></i>AI Diagnostics</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Prescription System</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Analytics Dashboard</li>
+                    </ul>
+                    <a href="/doctor-dashboard" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Access Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: var(--success-gradient);">
+                <h5 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Patient Portal
+                </h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="text-muted mb-4">
+                    Complete healthcare access with symptom checking, doctor consultations, appointment booking, and medical records.
+                </p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">Features:</small>
+                        <span class="badge bg-success">Essential</span>
+                    </div>
+                    <ul class="list-unstyled small mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i>Symptom Checker</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Online Consultations</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Appointment Booking</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Health Records</li>
+                    </ul>
+                    <a href="/patient-dashboard" class="btn btn-success w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Access Portal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100">
+            <div class="card-header" style="background: var(--warning-gradient);">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>
+                    Admin Panel
+                </h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="text-muted mb-4">
+                    Complete platform administration with user management, analytics, system monitoring, and quality assurance.
+                </p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">Features:</small>
+                        <span class="badge bg-warning">Advanced</span>
+                    </div>
+                    <ul class="list-unstyled small mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i>User Management</li>
+                        <li><i class="fas fa-check text-success me-2"></i>System Analytics</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Quality Control</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Platform Settings</li>
+                    </ul>
+                    <a href="/admin-dashboard" class="btn btn-warning w-100">
+                        <i class="fas fa-arrow-right me-2"></i>Access Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhancement Features -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-magic me-2"></i>
+                    Visual Enhancements Applied
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="gradient-text mb-3">🎨 Design Improvements</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Modern gradient backgrounds</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Enhanced typography with Google Fonts</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Smooth animations and transitions</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Glass morphism effects</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Professional color schemes</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="gradient-text mb-3">⚡ Interactive Elements</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Hover effects and micro-interactions</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Enhanced button styles</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Improved form elements</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Custom scrollbar design</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Responsive animations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="d-inline-flex gap-3 flex-wrap">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="loading-spinner me-2"></i>Loading Demo
+                        </button>
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-heart me-2"></i>Like Design
+                        </button>
+                        <button class="btn btn-warning btn-sm">
+                            <i class="fas fa-share me-2"></i>Share
+                        </button>
+                        <button class="btn btn-danger btn-sm">
+                            <i class="fas fa-download me-2"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

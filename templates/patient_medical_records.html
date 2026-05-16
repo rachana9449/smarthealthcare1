@@ -1,0 +1,165 @@
+{% extends "base_clean.html" %}
+
+{% block title %}Medical Records{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-file-medical"></i> My Medical Records</h4>
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+                    <i class="fas fa-plus"></i> Add Record
+                </button>
+            </div>
+            <div class="card-body">
+                {% if records %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Uploaded By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td>{{ record.record_title }}</td>
+                                <td>{{ record.created_at[:10] }}</td>
+                                <td>{{ record.uploaded_by_name or 'Self' }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                            data-bs-target="#viewRecordModal{{ record.id }}">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- View Record Modal -->
+                            <div class="modal fade" id="viewRecordModal{{ record.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">{{ record.record_title }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Type:</strong> {{ record.record_type }}</p>
+                                            <p><strong>Date:</strong> {{ record.created_at }}</p>
+                                            <p><strong>Uploaded By:</strong> {{ record.uploaded_by_name or 'Self' }}</p>
+                                            <hr>
+                                            <div class="record-data">
+                                                {% if '[File: ' in record.record_data %}
+                                                    {% set parts = record.record_data.split('[File: ') %}
+                                                    <p>{{ parts[0] }}</p>
+                                                    {% if parts|length > 1 %}
+                                                        {% set file_path = parts[1].replace(']', '').strip() %}
+                                                        <div class="mt-3">
+                                                            <strong>Attached File:</strong><br>
+                                                            {% if file_path.endswith('.pdf') %}
+                                                                <a href="/static/{{ file_path }}" target="_blank" class="btn btn-primary btn-sm mt-2">
+                                                                    <i class="fas fa-file-pdf"></i> View PDF
+                                                                </a>
+                                                            {% else %}
+                                                                <img src="/static/{{ file_path }}" class="img-fluid mt-2" style="max-width: 100%; border: 1px solid #ddd; border-radius: 5px;" alt="Medical Record">
+                                                                <br>
+                                                                <a href="/static/{{ file_path }}" target="_blank" class="btn btn-primary btn-sm mt-2">
+                                                                    <i class="fas fa-download"></i> Download Image
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {{ record.record_data }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h5>No medical records yet</h5>
+                    <p class="text-muted">Add your medical records to keep track of your health history</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+                        <i class="fas fa-plus"></i> Add First Record
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Record Modal -->
+<div class="modal fade" id="addRecordModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Medical Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_medical_record') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="record_type" class="form-label">Record Type</label>
+                        <select class="form-select" id="record_type" name="record_type" required>
+                            <option value="">Select Type</option>
+                            <option value="Lab Report">Lab Report</option>
+                            <option value="Prescription">Prescription</option>
+                            <option value="X-Ray">X-Ray</option>
+                            <option value="MRI">MRI</option>
+                            <option value="CT Scan">CT Scan</option>
+                            <option value="Vaccination">Vaccination</option>
+                            <option value="Surgery">Surgery</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="record_title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="record_title" name="record_title" 
+                               placeholder="e.g., Blood Test Results" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="record_data" class="form-label">Details</label>
+                        <textarea class="form-control" id="record_data" name="record_data" rows="4" 
+                                  placeholder="Enter medical record details..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="record_file" class="form-label">
+                            <i class="fas fa-image"></i> Upload Lab Report / Image
+                        </label>
+                        <input type="file" class="form-control" id="record_file" name="record_file" 
+                               accept="image/*,.pdf">
+                        <small class="text-muted">Supported formats: JPG, PNG, PDF (Max 10MB)</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> You can upload lab reports, X-rays, prescriptions, or any medical documents as images or PDFs.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

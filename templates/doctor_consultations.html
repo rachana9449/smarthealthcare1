@@ -1,0 +1,178 @@
+{% extends "base_clean.html" %}
+{% block title %}Consultation History{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4" style="color: #333;">
+        <i class="fas fa-stethoscope"></i> Patient Consultations
+    </h2>
+
+    <div class="card shadow-lg">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h4 class="mb-0"><i class="fas fa-users"></i> Patient Consultation History</h4>
+        </div>
+        <div class="card-body p-0">
+            {% if consultations %}
+            <div class="table-responsive">
+                <table class="table consultation-table table-fixed table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="col-email">PATIENT EMAIL</th>
+                            <th class="col-profile">PATIENT PROFILE</th>
+                            <th class="col-disease">PREDICTED DISEASE</th>
+                            <th class="col-date">CONSULTATION DATE</th>
+                            <th class="col-status">STATUS</th>
+                            <th class="col-actions">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consult in consultations %}
+                        <tr>
+                            <td class="col-email">
+                                <div class="text-truncate-custom" title="{{ consult.patient_email }}">
+                                    {{ consult.patient_email }}
+                                </div>
+                            </td>
+                            <td class="col-profile">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#profileModal{{ consult.id }}">
+                                    <i class="fas fa-user"></i> View
+                                </button>
+                            </td>
+                            <td class="col-disease">
+                                <span class="badge bg-info">
+                                    {{ consult.diagnosis if consult.diagnosis else 'GERD' }}
+                                </span>
+                            </td>
+                            <td class="col-date">
+                                <small>{{ consult.consultation_date[:10] }}</small>
+                            </td>
+                            <td class="col-status">
+                                {% if consult.status == 'completed' %}
+                                <span class="badge bg-success">Closed</span>
+                                {% elif consult.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% else %}
+                                <span class="badge bg-info">{{ consult.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="col-actions">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#consultModal{{ consult.id }}">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Profile Modal -->
+                        <div class="modal fade" id="profileModal{{ consult.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">Patient Profile</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Patient Name:</strong> {{ consult.patient_name }}</p>
+                                        <p><strong>Email:</strong> {{ consult.patient_email }}</p>
+                                        <p><strong>Phone:</strong> {{ consult.patient_phone }}</p>
+                                        <p><strong>Consultation Type:</strong> 
+                                            {% if consult.consultation_type == 'appointment' %}
+                                                {% if consult.mode == 'online' %}
+                                                <span class="badge bg-primary"><i class="fas fa-video"></i> Online Video Consultation</span>
+                                                {% else %}
+                                                <span class="badge bg-success"><i class="fas fa-clinic-medical"></i> In-Person Clinic Visit</span>
+                                                {% endif %}
+                                            {% else %}
+                                            <span class="badge bg-info"><i class="fas fa-comment-medical"></i> Text Consultation</span>
+                                            {% endif %}
+                                        </p>
+                                        <p><strong>Symptoms/Reason:</strong> {{ consult.reason if consult.reason else 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Consultation Modal -->
+                        <div class="modal fade" id="consultModal{{ consult.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-success text-white">
+                                        <h5 class="modal-title">Consultation Details</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST" action="{{ url_for('doctor_consultations') }}">
+                                            <input type="hidden" name="consultation_id" value="{{ consult.id }}">
+                                            
+                                            <div class="mb-3">
+                                                <strong>Consultation Type:</strong>
+                                                {% if consult.consultation_type == 'appointment' %}
+                                                    {% if consult.mode == 'online' %}
+                                                    <span class="badge bg-primary"><i class="fas fa-video"></i> Online Video Consultation</span>
+                                                    {% else %}
+                                                    <span class="badge bg-success"><i class="fas fa-clinic-medical"></i> In-Person Clinic Visit</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                <span class="badge bg-info"><i class="fas fa-comment-medical"></i> Text Consultation</span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Symptoms/Reason:</strong>
+                                                <p class="bg-light p-3 rounded">{{ consult.reason if consult.reason else 'Not provided' }}</p>
+                                            </div>
+                                            
+                                            {% if consult.consultation_type == 'text' %}
+                                            <div class="mb-3">
+                                                <label class="form-label"><strong>Diagnosis:</strong></label>
+                                                <input type="text" name="diagnosis" class="form-control" value="{{ consult.diagnosis if consult.diagnosis else '' }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label"><strong>Prescription:</strong></label>
+                                                <textarea name="prescription" class="form-control" rows="3">{{ consult.prescription if consult.prescription else '' }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label"><strong>Status:</strong></label>
+                                                <select name="status" class="form-select">
+                                                    <option value="pending" {% if consult.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                    <option value="completed" {% if consult.status == 'completed' %}selected{% endif %}>Completed</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            {% else %}
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i> This is a scheduled appointment. 
+                                                {% if consult.mode == 'online' %}
+                                                Join the video call at the scheduled time.
+                                                {% else %}
+                                                Patient will visit your clinic at the scheduled time.
+                                                {% endif %}
+                                            </div>
+                                            <p><strong>Status:</strong> {{ consult.status }}</p>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <p class="text-muted">No consultations yet.</p>
+                <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-primary">
+                    <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

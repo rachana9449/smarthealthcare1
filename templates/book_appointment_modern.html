@@ -1,0 +1,558 @@
+{% extends "base_clean.html" %}
+{% block title %}Book Appointment - MediConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: #f0f2f8 !important; }
+
+    .wizard-container { max-width: 860px; margin: 0 auto; }
+
+    /* ── Stepper ── */
+    .wizard-progress {
+        display: flex; justify-content: space-between;
+        margin-bottom: 2.5rem; position: relative;
+    }
+    .wizard-progress::before {
+        content: ''; position: absolute;
+        top: 23px; left: 0; right: 0; height: 3px;
+        background: #e2e8f0; z-index: 0;
+    }
+    .wizard-progress-fill {
+        position: absolute; top: 23px; left: 0; height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        z-index: 0; transition: width 0.4s ease;
+    }
+    .wizard-step {
+        display: flex; flex-direction: column; align-items: center;
+        position: relative; z-index: 1; flex: 1;
+    }
+    .wizard-step-number {
+        width: 48px; height: 48px; border-radius: 50%;
+        background: #fff; border: 3px solid #cbd5e1; color: #94a3b8;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1rem; margin-bottom: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .wizard-step.active .wizard-step-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; border-color: #667eea;
+        box-shadow: 0 0 0 6px rgba(102,126,234,.15), 0 4px 14px rgba(102,126,234,.4);
+        transform: scale(1.1);
+    }
+    .wizard-step.completed .wizard-step-number {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; border-color: #10b981;
+        box-shadow: 0 2px 8px rgba(16,185,129,.3);
+    }
+    .wizard-step-label {
+        font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-align: center;
+    }
+    .wizard-step.active .wizard-step-label  { color: #667eea; }
+    .wizard-step.completed .wizard-step-label { color: #10b981; }
+
+    /* ── Wizard card ── */
+    .wizard-card {
+        background: #fff; border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        padding: 36px 40px; min-height: 400px;
+    }
+    @media(max-width:576px){ .wizard-card{ padding: 24px 20px; } }
+
+    .step-content { display: none; animation: fadeIn .3s ease; }
+    .step-content.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Doctor info banner ── */
+    .doctor-info-card {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; border-radius: 16px; padding: 24px 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 6px 24px rgba(102,126,234,.35);
+    }
+
+    /* ── Time slots ── */
+    .time-slot {
+        padding: 10px 14px; border: 2px solid #e2e8f0;
+        border-radius: 12px; cursor: pointer;
+        transition: all 0.2s; text-align: center;
+        font-weight: 600; font-size: .88rem; color: #374151;
+        background: #fff;
+    }
+    .time-slot:hover { border-color: #667eea; background: #f0f2ff; color: #667eea; }
+    .time-slot.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; box-shadow: 0 4px 14px rgba(102,126,234,.35);
+    }
+
+    /* ── Availability day ── */
+    .availability-day {
+        background: #f8fafc; border-left: 4px solid #667eea;
+        padding: 12px 16px; border-radius: 10px; margin-bottom: 8px;
+    }
+
+    /* ── Nav buttons ── */
+    .btn-prev {
+        background: #f1f5f9; color: #64748b; border: none;
+        border-radius: 12px; padding: 12px 24px; font-weight: 600;
+        font-size: .9rem; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 6px; transition: all .2s;
+    }
+    .btn-prev:hover { background: #e2e8f0; }
+    .btn-cancel {
+        background: transparent; color: #94a3b8;
+        border: 2px solid #e2e8f0; border-radius: 12px;
+        padding: 11px 24px; font-weight: 600; font-size: .9rem;
+        text-decoration: none; display: inline-flex;
+        align-items: center; gap: 6px; transition: all .2s;
+    }
+    .btn-cancel:hover { border-color: #94a3b8; color: #64748b; }
+    .btn-next {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; border: none; border-radius: 12px;
+        padding: 12px 28px; font-weight: 700; font-size: .9rem;
+        cursor: pointer; display: inline-flex; align-items: center;
+        gap: 6px; box-shadow: 0 4px 14px rgba(102,126,234,.4);
+        transition: all .2s;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,.5); }
+    .btn-submit {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; border: none; border-radius: 12px;
+        padding: 12px 28px; font-weight: 700; font-size: .9rem;
+        cursor: pointer; display: inline-flex; align-items: center;
+        gap: 6px; box-shadow: 0 4px 14px rgba(16,185,129,.4);
+        transition: all .2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,.5); }
+
+    /* ── Confirm summary cards ── */
+    .confirm-card {
+        background: #f8fafc; border: 1px solid #e2e8f0;
+        border-radius: 14px; padding: 18px 20px;
+    }
+    .confirm-card h6 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #94a3b8; margin-bottom: 6px; }
+    .confirm-card p  { font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding:32px 0 60px;background:#f0f2f8;min-height:100vh;">
+<div class="container">
+<div class="wizard-container">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h1 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:2rem;color:#1e293b;margin-bottom:8px;">
+            <i class="fas fa-calendar-plus me-2" style="background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+            Book Your Appointment
+        </h1>
+        <p style="color:#64748b;font-size:.95rem;">Follow the simple steps to schedule your consultation</p>
+    </div>
+
+    <!-- Stepper -->
+    <div class="wizard-progress mb-4">
+        <div class="wizard-progress-fill" id="progressFill" style="width:25%;"></div>
+        <div class="wizard-step active" data-step="1">
+            <div class="wizard-step-number">1</div>
+            <div class="wizard-step-label">Doctor Info</div>
+        </div>
+        <div class="wizard-step" data-step="2">
+            <div class="wizard-step-number">2</div>
+            <div class="wizard-step-label">Date &amp; Time</div>
+        </div>
+        <div class="wizard-step" data-step="3">
+            <div class="wizard-step-number">3</div>
+            <div class="wizard-step-label">Details</div>
+        </div>
+        <div class="wizard-step" data-step="4">
+            <div class="wizard-step-number"><i class="fas fa-check" style="font-size:.8rem;"></i></div>
+            <div class="wizard-step-label">Confirm</div>
+        </div>
+    </div>
+
+    <!-- Wizard Card -->
+    <div class="wizard-card">
+                <form method="POST" id="appointmentForm">
+                    <!-- Step 1: Doctor Information -->
+                    <div class="step-content active" data-step="1">
+                        <h3 class="fw-bold mb-4">
+                            <i class="fas fa-user-md gradient-text me-2"></i>
+                            Doctor Information
+                        </h3>
+                        
+                        <div class="doctor-info-card">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center mb-3 mb-md-0">
+                                    <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center" 
+                                         style="width: 80px; height: 80px;">
+                                        <i class="fas fa-user-md fa-2x" style="color: var(--primary);"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <h4 class="fw-bold mb-2">Dr. {{ doctor.name }}</h4>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-stethoscope me-2"></i>
+                                                <span>{{ doctor.specialization }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-graduation-cap me-2"></i>
+                                                <span>{{ doctor.qualification }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-dollar-sign me-2"></i>
+                                                <span>Consultation Fee: ${{ doctor.consultation_fee }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-star me-2"></i>
+                                                <span>Highly Rated Professional</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if availability %}
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                Available Hours
+                            </h5>
+                            {% for slot in availability %}
+                            <div class="availability-day">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <strong>{{ slot.day_of_week }}</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <i class="fas fa-clock text-primary me-2"></i>
+                                        {{ slot.start_time }} - {{ slot.end_time }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Please select a date and time within the doctor's available hours.
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Date & Time Selection -->
+                    <div class="step-content" data-step="2">
+                        <h3 class="fw-bold mb-4">
+                            <i class="fas fa-calendar-alt gradient-text me-2"></i>
+                            Select Date & Time
+                        </h3>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label for="appointment_date" class="form-label fw-bold">
+                                    <i class="fas fa-calendar text-primary me-2"></i>
+                                    Appointment Date
+                                </label>
+                                <input type="date" class="form-control form-control-lg" 
+                                       id="appointment_date" name="appointment_date" 
+                                       min="{{ today }}" required>
+                                <small class="text-muted">Select a date from today onwards</small>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="appointment_time" class="form-label fw-bold">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    Appointment Time
+                                </label>
+                                <input type="time" class="form-control form-control-lg" 
+                                       id="appointment_time" name="appointment_time" required>
+                                <small class="text-muted">Choose a convenient time</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5 class="fw-bold mb-3">Quick Time Selection</h5>
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="09:00">09:00 AM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="10:00">10:00 AM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="11:00">11:00 AM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="14:00">02:00 PM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="15:00">03:00 PM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="16:00">04:00 PM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="17:00">05:00 PM</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="time-slot" data-time="18:00">06:00 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Appointment Details -->
+                    <div class="step-content" data-step="3">
+                        <h3 class="fw-bold mb-4">
+                            <i class="fas fa-clipboard-list gradient-text me-2"></i>
+                            Appointment Details
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <label for="reason" class="form-label fw-bold">
+                                <i class="fas fa-notes-medical text-primary me-2"></i>
+                                Reason for Appointment
+                            </label>
+                            <textarea class="form-control" id="reason" name="reason" rows="6" 
+                                      data-voice="true"
+                                      placeholder="Describe your symptoms or reason for consultation...&#10;&#10;Example:&#10;- Persistent headache for 3 days&#10;- Fever and body ache&#10;- Follow-up consultation" 
+                                      required></textarea>
+                            <small class="text-muted">
+                                <i class="fas fa-microphone text-primary me-1"></i>
+                                Click the microphone button to use voice input
+                            </small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-laptop-medical text-primary me-2"></i>
+                                Consultation Mode
+                            </label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="consultation_mode" id="mode_online" value="online" checked>
+                                    <label class="btn btn-outline-primary w-100 p-4 text-start" for="mode_online" style="height: 100%; border-width: 2px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-video fa-3x mb-3"></i>
+                                            <h5 class="fw-bold mb-2">Online Consultation</h5>
+                                            <p class="text-muted small mb-0">Video call with doctor from home</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="consultation_mode" id="mode_offline" value="offline">
+                                    <label class="btn btn-outline-success w-100 p-4 text-start" for="mode_offline" style="height: 100%; border-width: 2px;">
+                                        <div class="text-center">
+                                            <i class="fas fa-clinic-medical fa-3x mb-3"></i>
+                                            <h5 class="fw-bold mb-2">In-Person Visit</h5>
+                                            <p class="text-muted small mb-0">Visit doctor at clinic</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Choose how you want to consult with the doctor</small>
+                        </div>
+                        
+                        <div style="background:#fff5f5;border-left:4px solid #ef4444;border-radius:14px;padding:18px 20px;">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_emergency"
+                                       name="is_emergency" style="width:3rem;height:1.5rem;">
+                                <label class="form-check-label ms-2" for="is_emergency">
+                                    <strong class="text-danger fs-5">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        This is an EMERGENCY
+                                    </strong>
+                                    <div class="small text-muted mt-1">
+                                        Check this if you need immediate medical attention. The doctor will be notified immediately.
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Confirmation -->
+                    <div class="step-content" data-step="4">
+                        <h3 class="fw-bold mb-4" style="color:#1e293b;">
+                            <i class="fas fa-check-circle me-2" style="color:#10b981;"></i>
+                            Confirm Your Appointment
+                        </h3>
+
+                        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:16px;padding:22px 26px;margin-bottom:20px;box-shadow:0 6px 24px rgba(102,126,234,.35);">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-user-md me-2"></i>Doctor Details</h5>
+                            <div class="row g-2">
+                                <div class="col-md-6"><strong>Name:</strong> Dr. {{ doctor.name }}</div>
+                                <div class="col-md-6"><strong>Specialization:</strong> {{ doctor.specialization }}</div>
+                                <div class="col-md-6"><strong>Qualification:</strong> {{ doctor.qualification }}</div>
+                                <div class="col-md-6"><strong>Fee:</strong> ${{ doctor.consultation_fee }}</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="confirm-card">
+                                    <h6><i class="fas fa-calendar me-1" style="color:#667eea;"></i>Date</h6>
+                                    <p id="confirmDate">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="confirm-card">
+                                    <h6><i class="fas fa-clock me-1" style="color:#667eea;"></i>Time</h6>
+                                    <p id="confirmTime">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="confirm-card">
+                                    <h6><i class="fas fa-laptop-medical me-1" style="color:#667eea;"></i>Mode</h6>
+                                    <p id="confirmMode">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="confirm-card mb-4">
+                            <h6><i class="fas fa-notes-medical me-1" style="color:#667eea;"></i>Reason for Visit</h6>
+                            <p id="confirmReason" style="font-weight:400;color:#475569;font-size:.9rem;">-</p>
+                        </div>
+
+                        <div style="background:#d1fae5;border-left:4px solid #10b981;border-radius:12px;padding:14px 18px;color:#065f46;">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Ready to book!</strong> Please review your details and click "Proceed to Payment" to continue.
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-4" style="border-top:1px solid #f1f5f9;">
+                        <button type="button" class="btn-prev" id="prevBtn">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <a href="{{ url_for('consult_doctor') }}" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="button" class="btn-next" id="nextBtn">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn-submit" id="submitBtn" style="display:none;">
+                            <i class="fas fa-credit-card"></i> Proceed to Payment
+                        </button>
+                    </div>
+                </form>
+    </div><!-- /wizard-card -->
+</div><!-- /wizard-container -->
+</div><!-- /container -->
+</div><!-- /page wrapper -->
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.step-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show current step
+    document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
+    
+    // Update wizard progress
+    document.querySelectorAll('.wizard-step').forEach((stepEl, index) => {
+        stepEl.classList.remove('active', 'completed');
+        if (index + 1 < step) {
+            stepEl.classList.add('completed');
+        } else if (index + 1 === step) {
+            stepEl.classList.add('active');
+        }
+    });
+    
+    // Update progress bar
+    const progress = (step / totalSteps) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+    
+    // Update buttons
+    document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'inline-flex';
+    document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'inline-flex';
+    document.getElementById('submitBtn').style.display = step === totalSteps ? 'inline-flex' : 'none';
+    
+    // Update confirmation details
+    if (step === 4) {
+        updateConfirmation();
+    }
+}
+
+function updateConfirmation() {
+    const date = document.getElementById('appointment_date').value;
+    const time = document.getElementById('appointment_time').value;
+    const reason = document.getElementById('reason').value;
+    const mode = document.querySelector('input[name="consultation_mode"]:checked').value;
+    
+    // Convert time to 12-hour format for display
+    let displayTime = time;
+    if (time) {
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        displayTime = `${displayHour}:${minutes} ${ampm}`;
+    }
+    
+    // Format mode display
+    const modeDisplay = mode === 'online' ? '📹 Online (Video Call)' : '🏥 In-Person (Clinic Visit)';
+    
+    document.getElementById('confirmDate').textContent = date || '-';
+    document.getElementById('confirmTime').textContent = displayTime || '-';
+    document.getElementById('confirmMode').textContent = modeDisplay || '-';
+    document.getElementById('confirmReason').textContent = reason || '-';
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+    if (validateStep(currentStep)) {
+        currentStep++;
+        showStep(currentStep);
+    }
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+    currentStep--;
+    showStep(currentStep);
+});
+
+function validateStep(step) {
+    if (step === 2) {
+        const date = document.getElementById('appointment_date').value;
+        const time = document.getElementById('appointment_time').value;
+        if (!date || !time) {
+            alert('Please select both date and time');
+            return false;
+        }
+    } else if (step === 3) {
+        const reason = document.getElementById('reason').value;
+        if (!reason.trim()) {
+            alert('Please provide a reason for your appointment');
+            return false;
+        }
+    }
+    return true;
+}
+
+// Time slot selection
+document.querySelectorAll('.time-slot').forEach(slot => {
+    slot.addEventListener('click', function() {
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        this.classList.add('selected');
+        document.getElementById('appointment_time').value = this.dataset.time;
+    });
+});
+
+// Initialize
+showStep(1);
+</script>
+{% endblock %}

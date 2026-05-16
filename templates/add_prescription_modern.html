@@ -1,0 +1,700 @@
+{% extends "base_clean.html" %}
+{% block title %}Add Prescription - MediConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: #f0f2f8 !important; }
+.rx-wrap { padding: 32px 0 60px; }
+
+/* ── Info banner ── */
+.info-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 32px 36px;
+  color: #fff;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(102,126,234,.38);
+}
+/* Watermark doctor icon */
+.info-banner::before {
+  content: '\f0f0';          /* fa-stethoscope unicode */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: -20px; top: -20px;
+  font-size: 160px;
+  color: rgba(255,255,255,.07);
+  line-height: 1;
+  pointer-events: none;
+}
+/* Watermark patient icon */
+.info-banner::after {
+  content: '\f007';          /* fa-user unicode */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  left: -20px; bottom: -30px;
+  font-size: 140px;
+  color: rgba(255,255,255,.06);
+  line-height: 1;
+  pointer-events: none;
+}
+.info-banner h4 { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: #fff; }
+.info-banner .field-lbl { font-size: .7rem; opacity: .75; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 2px; }
+.info-banner .field-val { font-size: .95rem; font-weight: 700; color: #fff; }
+.info-banner i { color: rgba(255,255,255,.85); }
+.info-banner .divider { border-color: rgba(255,255,255,.25) !important; }
+
+/* ── Prescription section card ── */
+.rx-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 30px;
+  margin-bottom: 20px;
+  border: 2px solid #f1f5f9;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+  transition: border-color .2s, box-shadow .2s;
+  position: relative;
+  overflow: hidden;
+}
+.rx-section:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102,126,234,.1), 0 2px 16px rgba(0,0,0,.06);
+}
+
+/* ── Section 1 (Medicines) — pills + stethoscope watermark ── */
+.rx-section-medicines::before {
+  content: '\f484';   /* fa-pills */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: -10px; bottom: -20px;
+  font-size: 140px;
+  color: rgba(16,185,129,.07);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.rx-section-medicines::after {
+  content: '\f0f0';   /* fa-stethoscope */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  left: -15px; top: -15px;
+  font-size: 110px;
+  color: rgba(16,185,129,.05);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Section 2 (Lab Tests) — flask + hospital watermark ── */
+.rx-section-lab::before {
+  content: '\f0c3';   /* fa-flask */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: -10px; bottom: -20px;
+  font-size: 140px;
+  color: rgba(59,130,246,.07);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.rx-section-lab::after {
+  content: '\f0f8';   /* fa-hospital */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  left: -15px; top: -15px;
+  font-size: 110px;
+  color: rgba(59,130,246,.05);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Section 3 (Notes) — notes-medical + user-md watermark ── */
+.rx-section-notes::before {
+  content: '\f481';   /* fa-notes-medical */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: -10px; bottom: -20px;
+  font-size: 140px;
+  color: rgba(245,158,11,.07);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.rx-section-notes::after {
+  content: '\f0f0';   /* fa-stethoscope */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  left: -15px; top: -15px;
+  font-size: 110px;
+  color: rgba(245,158,11,.05);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content stays above watermarks */
+.rx-section > * { position: relative; z-index: 1; }
+
+.rx-section .sec-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: #fff; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
+.rx-section h4 { font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+.rx-section .sub { font-size: .82rem; color: #64748b; margin-bottom: 16px; }
+
+/* ── Quick templates ── */
+.qt-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #f1f5f9; border: 1.5px solid #e2e8f0;
+  border-radius: 20px; padding: 5px 14px;
+  font-size: .78rem; font-weight: 600; color: #475569;
+  cursor: pointer; transition: all .18s;
+}
+.qt-chip:hover { background: #ede9fe; border-color: #667eea; color: #667eea; }
+
+/* ── Textarea wrapper ── */
+.ta-wrap { position: relative; margin-bottom: 8px; }
+.ta-wrap textarea {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px 50px 16px;
+  font-size: .9rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+  display: block;
+}
+.ta-wrap textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,.12);
+  outline: none;
+}
+
+/* ── Voice button bar below textarea ── */
+.voice-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.voice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(102,126,234,.4);
+  transition: transform .2s, box-shadow .2s, background .2s;
+  user-select: none;
+}
+.voice-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(102,126,234,.5); }
+.voice-btn.recording {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 3px 10px rgba(239,68,68,.5);
+  animation: pulse-rec 1s ease-in-out infinite;
+}
+@keyframes pulse-rec {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.voice-status {
+  font-size: .78rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+.voice-status.active { color: #ef4444; font-weight: 600; }
+.voice-hint { font-size: .75rem; color: #94a3b8; margin-top: 4px; display: flex; align-items: center; gap: 5px; }
+
+/* ── Info alert ── */
+.info-alert {
+  background: #eff6ff; border-left: 4px solid #3b82f6;
+  border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
+  color: #1e40af;
+}
+.info-alert h6 { font-weight: 800; margin-bottom: 8px; color: #1e40af; }
+.info-alert ul { margin: 0; padding-left: 18px; font-size: .85rem; }
+.info-alert li { margin-bottom: 4px; }
+
+/* ── Action buttons ── */
+.btn-save {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 14px 32px; font-weight: 700; font-size: 1rem;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(102,126,234,.4);
+  transition: opacity .2s, transform .2s;
+}
+.btn-save:hover { opacity: .88; transform: translateY(-2px); color: #fff; }
+.btn-cancel {
+  background: #f1f5f9; color: #475569; border: none; border-radius: 12px;
+  padding: 14px 28px; font-weight: 700; font-size: 1rem;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  transition: background .2s;
+}
+.btn-cancel:hover { background: #e2e8f0; color: #1e293b; }
+.btn-back {
+  background: #f1f5f9; color: #475569; border: none; border-radius: 12px;
+  padding: 10px 20px; font-weight: 600; font-size: .9rem;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  transition: background .2s;
+}
+.btn-back:hover { background: #e2e8f0; color: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rx-wrap">
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-lg-10">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.8rem;color:#1e293b;margin:0;">
+      <i class="fas fa-prescription me-2" style="background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+      Add Prescription
+    </h1>
+    <a href="{{ url_for('doctor_appointments') }}" class="btn-back">
+      <i class="fas fa-arrow-left"></i> Back
+    </a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" style="border-radius:12px;margin-bottom:16px;">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Patient + Doctor Info Banner -->
+  <div class="info-banner">
+    <h4><i class="fas fa-user-injured me-2"></i>Patient Information</h4>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-user-circle fa-lg"></i>
+          <div>
+            <div class="field-lbl">Patient Name</div>
+            <div class="field-val">{{ appointment.patient_name }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-envelope fa-lg"></i>
+          <div>
+            <div class="field-lbl">Email</div>
+            <div class="field-val">{{ appointment.patient_email }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-calendar fa-lg"></i>
+          <div>
+            <div class="field-lbl">Appointment Date</div>
+            <div class="field-val">{{ appointment.appointment_date }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-clock fa-lg"></i>
+          <div>
+            <div class="field-lbl">Appointment Time</div>
+            <div class="field-val">{{ appointment.appointment_time }}</div>
+          </div>
+        </div>
+      </div>
+      {% if appointment.reason %}
+      <div class="col-12">
+        <hr class="divider my-2">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-notes-medical fa-lg"></i>
+          <div>
+            <div class="field-lbl">Reason for Visit</div>
+            <div class="field-val">{{ appointment.reason }}</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Prescription Form -->
+  <form method="POST">
+
+    <!-- Medicines Section -->
+    <div class="rx-section rx-section-medicines">
+      <div class="d-flex align-items-start gap-3 mb-4">
+        <div class="sec-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+          <i class="fas fa-pills"></i>
+        </div>
+        <div>
+          <h4>Prescribed Medicines</h4>
+          <div class="sub">List all prescribed medicines with dosage and instructions</div>
+        </div>
+      </div>
+
+      <!-- Quick Templates -->
+      <div class="mb-3">
+        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Quick Templates:</div>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="qt-chip" onclick="insertTemplate('prescription','1. Paracetamol 500mg - 1 tablet twice daily after meals\n')">
+            <i class="fas fa-plus-circle"></i> Paracetamol
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('prescription','1. Amoxicillin 250mg - 1 capsule three times daily\n')">
+            <i class="fas fa-plus-circle"></i> Antibiotic
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('prescription','1. Vitamin D3 - 1 tablet once daily\n')">
+            <i class="fas fa-plus-circle"></i> Vitamin
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('prescription','1. Metformin 500mg - 1 tablet twice daily with meals\n')">
+            <i class="fas fa-plus-circle"></i> Metformin
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('prescription','1. Omeprazole 20mg - 1 capsule before breakfast\n')">
+            <i class="fas fa-plus-circle"></i> Omeprazole
+          </span>
+        </div>
+      </div>
+
+      <div class="ta-wrap">
+        <textarea name="prescription" id="prescription" rows="8"
+          placeholder="Enter prescribed medicines, dosage, and instructions...&#10;&#10;Example:&#10;1. Paracetamol 500mg - 1 tablet twice daily after meals&#10;2. Amoxicillin 250mg - 1 capsule three times daily&#10;3. Vitamin D3 - 1 tablet once daily">{{ appointment.prescription or '' }}</textarea>
+      </div>
+      <div class="voice-bar">
+        <button type="button" class="voice-btn" id="voice-btn-prescription" onclick="toggleVoice('prescription')">
+          <i class="fas fa-microphone" id="mic-icon-prescription"></i>
+          <span id="mic-label-prescription">Start Dictation</span>
+        </button>
+        <span class="voice-status" id="voice-status-prescription">Click to speak</span>
+      </div>
+    </div>
+
+    <!-- Lab Tests Section -->
+    <div class="rx-section rx-section-lab">
+      <div class="d-flex align-items-start gap-3 mb-4">
+        <div class="sec-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+          <i class="fas fa-flask"></i>
+        </div>
+        <div>
+          <h4>Lab Tests &amp; Diagnostics</h4>
+          <div class="sub">List all recommended tests and diagnostic procedures</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Quick Templates:</div>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="qt-chip" onclick="insertTemplate('lab_tests','1. Complete Blood Count (CBC)\n')">
+            <i class="fas fa-plus-circle"></i> CBC
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('lab_tests','1. Blood Sugar (Fasting)\n')">
+            <i class="fas fa-plus-circle"></i> Blood Sugar
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('lab_tests','1. X-Ray Chest PA View\n')">
+            <i class="fas fa-plus-circle"></i> X-Ray
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('lab_tests','1. Lipid Profile\n')">
+            <i class="fas fa-plus-circle"></i> Lipid Profile
+          </span>
+          <span class="qt-chip" onclick="insertTemplate('lab_tests','1. Thyroid Function Test (TFT)\n')">
+            <i class="fas fa-plus-circle"></i> Thyroid
+          </span>
+        </div>
+      </div>
+
+      <div class="ta-wrap">
+        <textarea name="lab_tests" id="lab_tests" rows="6"
+          placeholder="Enter recommended lab tests or diagnostic procedures...&#10;&#10;Example:&#10;1. Complete Blood Count (CBC)&#10;2. Blood Sugar (Fasting)&#10;3. X-Ray Chest PA View">{{ appointment.lab_tests or '' }}</textarea>
+      </div>
+      <div class="voice-bar">
+        <button type="button" class="voice-btn" id="voice-btn-lab_tests" onclick="toggleVoice('lab_tests')">
+          <i class="fas fa-microphone" id="mic-icon-lab_tests"></i>
+          <span id="mic-label-lab_tests">Start Dictation</span>
+        </button>
+        <span class="voice-status" id="voice-status-lab_tests">Click to speak</span>
+      </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="rx-section rx-section-notes">
+      <div class="d-flex align-items-start gap-3 mb-4">
+        <div class="sec-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+          <i class="fas fa-notes-medical"></i>
+        </div>
+        <div>
+          <h4>Additional Notes <span style="background:#f1f5f9;color:#64748b;border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:700;margin-left:6px;">Optional</span></h4>
+          <div class="sub">Any additional instructions, diagnosis, or notes for the patient</div>
+        </div>
+      </div>
+
+      <div class="ta-wrap">
+        <textarea name="notes" id="notes" rows="4"
+          placeholder="Any additional instructions or notes for the patient...&#10;&#10;Example:&#10;- Rest for 2-3 days&#10;- Avoid cold drinks&#10;- Follow-up after 1 week">{{ appointment.notes or '' }}</textarea>
+      </div>
+      <div class="voice-bar">
+        <button type="button" class="voice-btn" id="voice-btn-notes" onclick="toggleVoice('notes')">
+          <i class="fas fa-microphone" id="mic-icon-notes"></i>
+          <span id="mic-label-notes">Start Dictation</span>
+        </button>
+        <span class="voice-status" id="voice-status-notes">Click to speak</span>
+      </div>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="info-alert">
+      <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+      <ul>
+        <li>After saving, the patient will be notified via email</li>
+        <li>Patient can find nearby pharmacies and diagnostic centers</li>
+        <li>Prescription will be available in patient's medical records</li>
+        <li>You can edit the prescription later if needed</li>
+      </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-3 flex-wrap">
+      <button type="submit" class="btn-save flex-grow-1">
+        <i class="fas fa-save"></i> Save Prescription
+      </button>
+      <a href="{{ url_for('doctor_appointments') }}" class="btn-cancel">
+        <i class="fas fa-times"></i> Cancel
+      </a>
+    </div>
+
+  </form>
+
+</div>
+</div>
+</div>
+</div>
+
+<script>
+/* ── Quick template insertion ── */
+function insertTemplate(fieldId, text) {
+  var ta = document.getElementById(fieldId);
+  var lines = ta.value.split('\n').filter(function(l){ return l.trim(); });
+  var next = lines.length + 1;
+  var updated = text.replace(/^\d+\./, next + '.');
+  var start = ta.selectionStart;
+  ta.value = ta.value.substring(0, start) + updated + ta.value.substring(start);
+  ta.focus();
+  ta.setSelectionRange(start + updated.length, start + updated.length);
+}
+
+/* ══════════════════════════════════════════
+   VOICE INPUT — Web Speech API
+   Works on Chrome/Edge on localhost HTTP
+   ══════════════════════════════════════════ */
+var activeRecognition = null;
+var activeFieldId     = null;
+
+function toggleVoice(fieldId) {
+  // If already recording this field → stop
+  if (activeFieldId === fieldId && activeRecognition) {
+    activeRecognition.stop();
+    return;
+  }
+  // Stop any other active recording first
+  if (activeRecognition) {
+    activeRecognition.stop();
+    activeRecognition = null;
+    activeFieldId = null;
+  }
+  startVoice(fieldId);
+}
+
+function startVoice(fieldId) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SR) {
+    showVoiceError(fieldId,
+      'Voice input is not supported in this browser.\n' +
+      'Please use Google Chrome or Microsoft Edge.');
+    return;
+  }
+
+  var ta     = document.getElementById(fieldId);
+  var btn    = document.getElementById('voice-btn-' + fieldId);
+  var icon   = document.getElementById('mic-icon-' + fieldId);
+  var label  = document.getElementById('mic-label-' + fieldId);
+  var status = document.getElementById('voice-status-' + fieldId);
+
+  var recognition = new SR();
+  recognition.lang            = 'en-IN';   // Indian English
+  recognition.continuous      = true;
+  recognition.interimResults  = true;
+  recognition.maxAlternatives = 1;
+
+  activeRecognition = recognition;
+  activeFieldId     = fieldId;
+
+  // UI → recording state
+  btn.classList.add('recording');
+  icon.className  = 'fas fa-stop';
+  label.textContent = 'Stop';
+  status.textContent = '🔴 Listening...';
+  status.classList.add('active');
+
+  var baseText = ta.value;
+
+  recognition.onstart = function() {
+    status.textContent = '🔴 Listening — speak now...';
+  };
+
+  recognition.onresult = function(event) {
+    var interim = '';
+    var finalText = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      var transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
+    }
+    if (finalText) baseText += finalText;
+    ta.value = baseText + interim;
+    // Show interim in status
+    if (interim) status.textContent = '🔴 ' + interim.substring(0, 40) + '...';
+  };
+
+  recognition.onspeechend = function() {
+    status.textContent = '⏳ Processing...';
+  };
+
+  recognition.onerror = function(e) {
+    console.error('SpeechRecognition error:', e.error, e.message);
+    resetVoiceUI(fieldId);
+    var msg = {
+      'not-allowed'  : 'Microphone access denied.\nPlease allow microphone in browser settings and try again.',
+      'no-speech'    : 'No speech detected. Please speak clearly and try again.',
+      'network'      : 'Network error. Voice recognition requires an internet connection.',
+      'audio-capture': 'No microphone found. Please connect a microphone.',
+      'aborted'      : null   // user stopped — no error needed
+    }[e.error] || ('Voice error: ' + e.error);
+    if (msg) showVoiceError(fieldId, msg);
+  };
+
+  recognition.onend = function() {
+    resetVoiceUI(fieldId);
+  };
+
+  try {
+    recognition.start();
+  } catch(err) {
+    resetVoiceUI(fieldId);
+    showVoiceError(fieldId, 'Could not start voice input: ' + err.message);
+  }
+}
+
+function resetVoiceUI(fieldId) {
+  var btn    = document.getElementById('voice-btn-' + fieldId);
+  var icon   = document.getElementById('mic-icon-' + fieldId);
+  var label  = document.getElementById('mic-label-' + fieldId);
+  var status = document.getElementById('voice-status-' + fieldId);
+  if (btn)    btn.classList.remove('recording');
+  if (icon)   icon.className = 'fas fa-microphone';
+  if (label)  label.textContent = 'Start Dictation';
+  if (status) { status.textContent = 'Done'; status.classList.remove('active'); }
+  activeRecognition = null;
+  activeFieldId     = null;
+  // Reset status text after 2s
+  setTimeout(function() {
+    if (status) status.textContent = 'Click to speak';
+  }, 2000);
+}
+
+function showVoiceError(fieldId, msg) {
+  var status = document.getElementById('voice-status-' + fieldId);
+  if (status) {
+    status.textContent = '⚠ ' + msg.split('\n')[0];
+    status.style.color = '#ef4444';
+    setTimeout(function() {
+      status.textContent = 'Click to speak';
+      status.style.color = '';
+    }, 4000);
+  }
+  // Also show a nicer in-page toast instead of alert
+  var toast = document.createElement('div');
+  toast.style.cssText =
+    'position:fixed;top:80px;right:20px;z-index:9999;' +
+    'background:#fff;border-left:4px solid #ef4444;border-radius:12px;' +
+    'padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,.15);' +
+    'max-width:340px;font-size:.85rem;color:#1e293b;line-height:1.5;' +
+    'animation:slideIn .3s ease;';
+  toast.innerHTML =
+    '<strong style="color:#ef4444;"><i class="fas fa-exclamation-circle me-1"></i>Voice Input</strong><br>' +
+    msg.replace(/\n/g, '<br>');
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 5000);
+}
+
+/* ── Auto-save draft ── */
+var autoSaveTimer;
+function autoSaveDraft() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(function() {
+    try {
+      localStorage.setItem('rx_draft_{{ appointment.id }}', JSON.stringify({
+        prescription: document.getElementById('prescription').value,
+        lab_tests:    document.getElementById('lab_tests').value,
+        notes:        document.getElementById('notes').value
+      }));
+    } catch(e) {}
+  }, 2000);
+}
+
+window.addEventListener('load', function() {
+  try {
+    var draft = localStorage.getItem('rx_draft_{{ appointment.id }}');
+    if (draft) {
+      var d = JSON.parse(draft);
+      var p = document.getElementById('prescription');
+      var l = document.getElementById('lab_tests');
+      var n = document.getElementById('notes');
+      if (p && !p.value && d.prescription) p.value = d.prescription;
+      if (l && !l.value && d.lab_tests)    l.value = d.lab_tests;
+      if (n && !n.value && d.notes)        n.value = d.notes;
+    }
+  } catch(e) {}
+});
+
+document.querySelectorAll('textarea').forEach(function(ta) {
+  ta.addEventListener('input', autoSaveDraft);
+});
+
+document.querySelector('form').addEventListener('submit', function() {
+  try { localStorage.removeItem('rx_draft_{{ appointment.id }}'); } catch(e) {}
+});
+
+/* ── Slide-in animation for toast ── */
+var s = document.createElement('style');
+s.textContent = '@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}';
+document.head.appendChild(s);
+</script>
+{% endblock %}

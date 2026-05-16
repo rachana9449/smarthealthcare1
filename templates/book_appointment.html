@@ -1,0 +1,131 @@
+{% extends "base_clean.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-calendar-plus"></i> Book Appointment</h4>
+            </div>
+            <div class="card-body">
+                <!-- Doctor Information -->
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-user-md"></i> Dr. {{ doctor.name }}</h5>
+                    <p class="mb-1"><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+                    <p class="mb-1"><strong>Qualification:</strong> {{ doctor.qualification }}</p>
+                    <p class="mb-0"><strong>Consultation Fee:</strong> ${{ doctor.consultation_fee }}</p>
+                </div>
+
+                <!-- Appointment Form -->
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="appointment_date" class="form-label">Appointment Date</label>
+                        <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
+                               min="{{ today }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="appointment_time" class="form-label">Appointment Time</label>
+                        <input type="time" class="form-control" id="appointment_time" name="appointment_time" required>
+                    </div>
+
+                    {% if availability %}
+                    <div class="mb-3">
+                        <label class="form-label">Doctor's Available Hours:</label>
+                        <div class="list-group">
+                            {% for slot in availability %}
+                            <div class="list-group-item">
+                                <strong>{{ slot.day_of_week }}:</strong> {{ slot.start_time }} - {{ slot.end_time }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Appointment</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="4" 
+                                  placeholder="Describe your symptoms or reason for consultation..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-laptop-medical"></i> Consultation Mode</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-check-card">
+                                    <input class="form-check-input" type="radio" name="consultation_mode" id="mode_online" value="online" checked>
+                                    <label class="form-check-label w-100" for="mode_online">
+                                        <div class="card h-100 border-primary" style="cursor: pointer;">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                                                <h5 class="card-title">Online Consultation</h5>
+                                                <p class="card-text text-muted small">Video call with doctor from home</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-check-card">
+                                    <input class="form-check-input" type="radio" name="consultation_mode" id="mode_offline" value="offline">
+                                    <label class="form-check-label w-100" for="mode_offline">
+                                        <div class="card h-100 border-success" style="cursor: pointer;">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-clinic-medical fa-3x text-success mb-3"></i>
+                                                <h5 class="card-title">In-Person Visit</h5>
+                                                <p class="card-text text-muted small">Visit doctor at clinic</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted">Choose how you want to consult with the doctor</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_emergency" name="is_emergency">
+                            <label class="form-check-label" for="is_emergency">
+                                <strong class="text-danger">🚨 This is an EMERGENCY</strong>
+                            </label>
+                        </div>
+                        <small class="text-muted">Check this box if you need immediate medical attention. The doctor will be notified immediately.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check"></i> Confirm Appointment
+                        </button>
+                        <a href="{{ url_for('consult_doctor') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Doctors
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-card .form-check-input {
+    position: absolute;
+    opacity: 0;
+}
+.form-check-card .form-check-input:checked + label .card {
+    border-width: 3px;
+    box-shadow: 0 0 15px rgba(0,123,255,0.3);
+}
+.form-check-card label {
+    cursor: pointer;
+}
+.form-check-card .card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+</style>
+
+{% endblock %}

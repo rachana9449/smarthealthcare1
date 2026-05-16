@@ -1,0 +1,198 @@
+﻿{% extends "base_clean.html" %}
+{% block title %}Checkout - SmartCare{% endblock %}
+{% block extra_css %}
+<style>
+body{background:#f0f4ff}
+.pay-wrap{max-width:960px;margin:32px auto;padding:0 16px}
+.pay-hero{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;padding:32px 36px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.pay-hero::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;background:rgba(255,255,255,.07);border-radius:50%}
+.pay-hero h2{font-size:1.7rem;font-weight:800;margin-bottom:4px}
+.pay-hero p{opacity:.88;margin:0}
+.pay-card{background:#fff;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:28px 32px;margin-bottom:20px}
+.pay-card h5{font-size:1rem;font-weight:800;color:#1e293b;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.pay-card h5 i{color:#667eea}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:.92rem}
+.fee-row:last-child{border-bottom:none}
+.fee-row .label{color:#64748b}
+.fee-row .value{font-weight:700;color:#1e293b}
+.fee-total{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;color:#fff;margin-top:12px}
+.fee-total .t-label{font-size:.85rem;opacity:.85}
+.fee-total .t-value{font-size:1.6rem;font-weight:800}
+.coupon-box{display:flex;gap:10px}
+.coupon-box input{flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:.9rem}
+.coupon-box input:focus{border-color:#667eea;outline:none}
+.btn-apply{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-weight:700;cursor:pointer}
+.mode-card{border:2px solid #e2e8f0;border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;text-align:center}
+.mode-card:hover,.mode-card.selected{border-color:#667eea;background:#f0f2ff}
+.mode-card i{font-size:2rem;margin-bottom:8px;display:block}
+.mode-card.online i{color:#667eea}
+.mode-card.offline i{color:#10b981}
+.wallet-toggle{display:flex;align-items:center;gap:12px;background:#f8fafc;border-radius:12px;padding:14px 18px}
+.wallet-toggle input[type=checkbox]{width:20px;height:20px;accent-color:#667eea}
+.btn-pay{background:linear-gradient(135deg,#667eea,#f5576c);color:#fff;border:none;border-radius:14px;padding:16px;font-size:1.05rem;font-weight:800;width:100%;cursor:pointer;box-shadow:0 6px 20px rgba(102,126,234,.4);transition:transform .2s,box-shadow .2s}
+.btn-pay:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(102,126,234,.5)}
+.discount-badge{background:#d1fae5;color:#059669;border-radius:8px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.security-note{display:flex;align-items:center;gap:8px;color:#64748b;font-size:.78rem;justify-content:center;margin-top:12px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="pay-wrap">
+  <div class="pay-hero">
+    <h2><i class="fas fa-lock me-2"></i>Secure Checkout</h2>
+    <p>Complete your appointment booking with secure online payment</p>
+  </div>
+  <div class="row g-4">
+    <!-- Left: Summary -->
+    <div class="col-lg-5">
+      <div class="pay-card">
+        <h5><i class="fas fa-calendar-check"></i>Appointment Summary</h5>
+        <div class="fee-row"><span class="label"><i class="fas fa-user-md me-2" style="color:#667eea"></i>Doctor</span><span class="value">Dr. {{ apt.doctor_name }}</span></div>
+        <div class="fee-row"><span class="label"><i class="fas fa-stethoscope me-2" style="color:#667eea"></i>Specialization</span><span class="value">{{ apt.specialization }}</span></div>
+        <div class="fee-row"><span class="label"><i class="fas fa-calendar me-2" style="color:#667eea"></i>Date</span><span class="value">{{ apt.appointment_date }}</span></div>
+        <div class="fee-row"><span class="label"><i class="fas fa-clock me-2" style="color:#667eea"></i>Time</span><span class="value">{{ apt.appointment_time }}</span></div>
+        <div class="fee-row"><span class="label"><i class="fas fa-rupee-sign me-2" style="color:#667eea"></i>Consultation Fee</span><span class="value" id="baseFee">&#8377;{{ "%.2f"|format(fee) }}</span></div>
+        <div class="fee-row" id="discountRow" style="display:none"><span class="label">Discount</span><span class="value text-success" id="discountVal">-&#8377;0</span></div>
+        <div class="fee-row" id="walletRow" style="display:none"><span class="label">Wallet Used</span><span class="value text-info" id="walletVal">-&#8377;0</span></div>
+        <div class="fee-total"><div><div class="t-label">Total Payable</div><div class="t-value" id="totalAmt">&#8377;{{ "%.2f"|format(fee) }}</div></div><i class="fas fa-shield-alt fa-2x" style="opacity:.7"></i></div>
+      </div>
+      <div class="pay-card">
+        <h5><i class="fas fa-wallet"></i>SmartCare Wallet</h5>
+        <div class="wallet-toggle">
+          <input type="checkbox" id="useWallet" {% if wallet_balance <= 0 %}disabled{% endif %}>
+          <div><div style="font-weight:700;color:#1e293b">Use Wallet Balance</div><div style="font-size:.8rem;color:#64748b">Available: <strong>&#8377;{{ "%.2f"|format(wallet_balance) }}</strong></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Right: Payment form -->
+    <div class="col-lg-7">
+      <div class="pay-card">
+        <h5><i class="fas fa-tag"></i>Coupon Code</h5>
+        <div class="coupon-box">
+          <input type="text" id="couponInput" placeholder="Enter coupon code (e.g. HEALTH10)" style="text-transform:uppercase">
+          <button class="btn-apply" onclick="applyCoupon()"><i class="fas fa-check me-1"></i>Apply</button>
+        </div>
+        <div id="couponMsg" style="margin-top:8px;font-size:.82rem"></div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+          {% for c in ['HEALTH10','CARE20','FIRST50','SMARTCARE'] %}
+          <span onclick="document.getElementById('couponInput').value='{{c}}';applyCoupon()" style="background:#f0f2ff;color:#667eea;border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid #c7d2fe">{{c}}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="pay-card">
+        <h5><i class="fas fa-laptop-medical"></i>Consultation Mode</h5>
+        <div class="row g-3">
+          <div class="col-6"><div class="mode-card online selected" id="modeOnline" onclick="selectMode('online')"><i class="fas fa-video"></i><strong>Online</strong><div style="font-size:.78rem;color:#64748b;margin-top:4px">Video consultation</div></div></div>
+          <div class="col-6"><div class="mode-card offline" id="modeOffline" onclick="selectMode('offline')"><i class="fas fa-hospital"></i><strong>In-Person</strong><div style="font-size:.78rem;color:#64748b;margin-top:4px">Visit clinic</div></div></div>
+        </div>
+      </div>
+      <div class="pay-card">
+        <h5><i class="fas fa-credit-card"></i>Payment Method</h5>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+          {% for m,icon,label in [('upi','fas fa-mobile-alt','UPI'),('card','fas fa-credit-card','Card'),('netbanking','fas fa-university','Net Banking'),('wallet','fas fa-wallet','Wallet')] %}
+          <div style="flex:1;min-width:100px;border:2px solid #e2e8f0;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .2s" class="method-btn" data-method="{{m}}" onclick="selectMethod(this)">
+            <i class="{{icon}}" style="font-size:1.4rem;color:#667eea;display:block;margin-bottom:4px"></i>
+            <span style="font-size:.78rem;font-weight:700;color:#374151">{{label}}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <button class="btn-pay" id="payBtn" onclick="initiatePayment()">
+          <i class="fas fa-lock me-2"></i>Pay Securely — <span id="btnAmt">&#8377;{{ "%.2f"|format(fee) }}</span>
+        </button>
+        <div class="security-note"><i class="fas fa-shield-alt" style="color:#10b981"></i>256-bit SSL encrypted &bull; Powered by Razorpay &bull; PCI DSS compliant</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var BASE_FEE = {{ fee }};
+var APT_ID   = {{ apt.id }};
+var RKEY     = "{{ razorpay_key }}";
+var appliedCoupon = '';
+var walletUsed    = 0;
+var selectedMode  = 'online';
+var finalAmount   = BASE_FEE;
+
+function fmt(n){ return '\u20B9' + parseFloat(n).toFixed(2); }
+
+function updateSummary(){
+  var discount = appliedCoupon ? (BASE_FEE * getCouponPct(appliedCoupon) / 100) : 0;
+  var afterCoupon = BASE_FEE - discount;
+  var wallet = document.getElementById('useWallet').checked ? Math.min({{ wallet_balance }}, afterCoupon) : 0;
+  finalAmount = Math.max(0, afterCoupon - wallet);
+  document.getElementById('totalAmt').textContent = fmt(finalAmount);
+  document.getElementById('btnAmt').textContent   = fmt(finalAmount);
+  document.getElementById('discountRow').style.display = discount > 0 ? 'flex' : 'none';
+  document.getElementById('discountVal').textContent   = '-' + fmt(discount);
+  document.getElementById('walletRow').style.display   = wallet > 0 ? 'flex' : 'none';
+  document.getElementById('walletVal').textContent     = '-' + fmt(wallet);
+  walletUsed = wallet;
+}
+
+function getCouponPct(code){ var m={'HEALTH10':10,'CARE20':20,'FIRST50':50,'SMARTCARE':15}; return m[code]||0; }
+
+function applyCoupon(){
+  var code = document.getElementById('couponInput').value.toUpperCase().trim();
+  fetch('/payment/apply-coupon',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({coupon:code,amount:BASE_FEE})})
+  .then(r=>r.json()).then(d=>{
+    var msg = document.getElementById('couponMsg');
+    if(d.success){
+      appliedCoupon = code;
+      msg.innerHTML = '<span style="color:#059669"><i class="fas fa-check-circle me-1"></i>'+d.percent+'% off applied! You save '+fmt(d.discount)+'</span>';
+    } else {
+      appliedCoupon = '';
+      msg.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle me-1"></i>'+d.message+'</span>';
+    }
+    updateSummary();
+  });
+}
+
+function selectMode(m){
+  selectedMode = m;
+  document.getElementById('modeOnline').classList.toggle('selected', m==='online');
+  document.getElementById('modeOffline').classList.toggle('selected', m==='offline');
+}
+
+function selectMethod(el){
+  document.querySelectorAll('.method-btn').forEach(b=>{ b.style.borderColor='#e2e8f0'; b.style.background='#fff'; });
+  el.style.borderColor='#667eea'; el.style.background='#f0f2ff';
+}
+
+document.getElementById('useWallet').addEventListener('change', updateSummary);
+
+function initiatePayment(){
+  var btn = document.getElementById('payBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+  fetch('/payment/create-order',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({appointment_id:APT_ID,coupon_code:appliedCoupon,use_wallet:document.getElementById('useWallet').checked})})
+  .then(r=>r.json()).then(d=>{
+    if(!d.success){ alert('Error: '+(d.error||'Could not create order')); btn.disabled=false; btn.innerHTML='<i class="fas fa-lock me-2"></i>Pay Securely'; return; }
+    if(d.amount === 0){
+      window.location.href = '/payment/success/'+APT_ID; return;
+    }
+    var options = {
+      key: RKEY, amount: d.amount, currency: d.currency,
+      name: 'SmartCare', description: 'Appointment with Dr. '+d.doctor,
+      order_id: d.order_id,
+      prefill: { name: d.name },
+      theme: { color: '#667eea' },
+      handler: function(resp){
+        fetch('/payment/verify',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({razorpay_order_id:resp.razorpay_order_id,
+            razorpay_payment_id:resp.razorpay_payment_id,
+            razorpay_signature:resp.razorpay_signature,
+            appointment_id:APT_ID, method:'razorpay'})})
+        .then(r=>r.json()).then(v=>{
+          if(v.success) window.location.href = v.redirect || '/payment/success/'+APT_ID;
+          else window.location.href = '/payment/failed/'+APT_ID;
+        });
+      },
+      modal: { ondismiss: function(){ btn.disabled=false; btn.innerHTML='<i class="fas fa-lock me-2"></i>Pay Securely'; } }
+    };
+    var rzp = new Razorpay(options); rzp.open();
+  }).catch(e=>{ alert('Network error'); btn.disabled=false; btn.innerHTML='<i class="fas fa-lock me-2"></i>Pay Securely'; });
+}
+</script>
+{% endblock %}

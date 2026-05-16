@@ -1,0 +1,406 @@
+{% extends "base_clean.html" %}
+{% block title %}Patient Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<!-- Welcome Hero with Animated Background -->
+<section class="py-5 position-relative" style="background: var(--gradient-primary); overflow: hidden;">
+    <div class="hero-gradient"></div>
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center text-white py-4">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold mb-3 fade-in">Welcome back, {{ session.name }}! 👋</h1>
+                <p class="lead mb-0 fade-in" style="animation-delay: 0.2s;">Your health dashboard is ready. How can we help you today?</p>
+            </div>
+            <div class="col-md-4 text-md-end fade-in" style="animation-delay: 0.4s;">
+                <div class="glass-card-viz d-inline-block text-start p-3">
+                    <div class="small opacity-75">Member Since</div>
+                    <div class="fs-5 fw-bold">{{ session.get('created_at', 'Recently') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats with Enhanced Visualization -->
+<section class="py-4" style="background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="text-center scale-in">
+                    <div class="progress-ring" style="width: 80px; height: 80px; margin: 0 auto;">
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <linearGradient id="gradient-upcoming" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="45" class="progress-ring-circle"></circle>
+                            <circle cx="50" cy="50" r="45" class="progress-ring-progress" stroke="url(#gradient-upcoming)" 
+                                    style="stroke-dashoffset: {{ 283 - (283 * (upcoming_count|default(0) / 10)) }};"></circle>
+                        </svg>
+                        <div class="progress-ring-text">
+                            <div class="progress-ring-number" style="font-size: 1.5rem;">{{ upcoming_count|default(0) }}</div>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-bold">Upcoming</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center scale-in" style="animation-delay: 0.1s;">
+                    <div class="counter-animated" style="font-size: 2.5rem;">{{ total_consultations|default(0) }}</div>
+                    <div class="small text-muted fw-bold">Consultations</div>
+                    <div class="trend-indicator trend-up mt-2">
+                        <i class="fas fa-arrow-up"></i> +12%
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center scale-in" style="animation-delay: 0.2s;">
+                    <div class="counter-animated" style="font-size: 2.5rem;">{{ prescriptions_count|default(0) }}</div>
+                    <div class="small text-muted fw-bold">Prescriptions</div>
+                    <div class="mini-chart">
+                        <div class="sparkline">
+                            <div class="sparkline-bar" style="height: 40%; animation-delay: 0s;"></div>
+                            <div class="sparkline-bar" style="height: 60%; animation-delay: 0.1s;"></div>
+                            <div class="sparkline-bar" style="height: 45%; animation-delay: 0.2s;"></div>
+                            <div class="sparkline-bar" style="height: 80%; animation-delay: 0.3s;"></div>
+                            <div class="sparkline-bar" style="height: 100%; animation-delay: 0.4s;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center scale-in" style="animation-delay: 0.3s;">
+                    <div class="counter-animated" style="font-size: 2.5rem;">{{ records_count|default(0) }}</div>
+                    <div class="small text-muted fw-bold">Records</div>
+                    <div class="status-indicator status-active mt-2">
+                        Active
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Dashboard -->
+<section class="py-5" style="background: var(--gray-50);">
+    <div class="container">
+        <!-- Quick Actions with Enhanced Cards -->
+        <div class="mb-5">
+            <h2 class="fw-bold mb-4 slide-up">
+                <i class="fas fa-bolt gradient-text me-2"></i>
+                Quick Actions
+            </h2>
+            <div class="dashboard-grid">
+                <!-- Check Symptoms -->
+                <div class="stat-card-enhanced slide-up" style="animation-delay: 0.1s;">
+                    <div class="icon-animated mb-3" style="background: var(--viz-gradient-1);">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="metric-value" style="font-size: 1.5rem;">AI Check</div>
+                    <div class="metric-label mb-3">Symptom Analysis</div>
+                    <p class="text-muted small mb-3">Get instant AI-powered disease prediction based on your symptoms</p>
+                    <a href="{{ url_for('possible_conditions') }}" class="btn btn-gradient btn-modern w-100">
+                        <i class="fas fa-search"></i> Check Symptoms
+                    </a>
+                </div>
+                
+                <!-- Find Doctors -->
+                <div class="stat-card-enhanced slide-up" style="animation-delay: 0.2s;">
+                    <div class="icon-animated mb-3" style="background: var(--viz-gradient-3);">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="metric-value" style="font-size: 1.5rem;">500+</div>
+                    <div class="metric-label mb-3">Expert Doctors</div>
+                    <p class="text-muted small mb-3">Browse and connect with certified medical professionals</p>
+                    <a href="{{ url_for('consult_doctor') }}" class="btn btn-modern w-100" style="background: var(--gradient-info); color: white;">
+                        <i class="fas fa-stethoscope"></i> Find Doctors
+                    </a>
+                </div>
+                
+                <!-- Book Appointment -->
+                <div class="stat-card-enhanced slide-up" style="animation-delay: 0.3s;">
+                    <div class="icon-animated mb-3" style="background: var(--viz-gradient-4);">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="metric-value" style="font-size: 1.5rem;">24/7</div>
+                    <div class="metric-label mb-3">Available</div>
+                    <p class="text-muted small mb-3">Schedule appointments at your convenience</p>
+                    <a href="{{ url_for('consult_doctor') }}" class="btn btn-modern w-100" style="background: var(--gradient-success); color: white;">
+                        <i class="fas fa-calendar-check"></i> Book Now
+                    </a>
+                </div>
+                
+                <!-- Emergency -->
+                <div class="stat-card-enhanced slide-up" style="animation-delay: 0.4s;">
+                    <div class="icon-animated mb-3" style="background: var(--viz-gradient-2);">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <div class="metric-value" style="font-size: 1.5rem;">SOS</div>
+                    <div class="metric-label mb-3">Emergency</div>
+                    <p class="text-muted small mb-3">Immediate medical assistance for urgent cases</p>
+                    <a href="{{ url_for('emergency') }}" class="btn btn-modern w-100" style="background: var(--danger); color: white;">
+                        <i class="fas fa-exclamation-triangle"></i> Emergency
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Upcoming Appointments with Enhanced Timeline -->
+                <div class="glass-card-viz mb-4 slide-up">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-calendar-alt gradient-text me-2"></i>
+                            Upcoming Appointments
+                        </h3>
+                        <a href="{{ url_for('patient_appointments') }}" class="btn btn-modern btn-sm hover-lift">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    {% if upcoming_appointments and upcoming_appointments|length > 0 %}
+                        <div class="timeline-enhanced">
+                            {% for appointment in upcoming_appointments[:3] %}
+                                <div class="timeline-item-enhanced">
+                                    <div class="timeline-milestone">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h5 class="fw-bold mb-1">Dr. {{ appointment.doctor_name }}</h5>
+                                                <p class="text-muted small mb-0">{{ appointment.specialization }}</p>
+                                            </div>
+                                            <span class="badge" style="background: var(--gradient-primary);">
+                                                {{ appointment.mode }}
+                                            </span>
+                                        </div>
+                                        <div class="row g-2 small">
+                                            <div class="col-6">
+                                                <i class="fas fa-calendar text-primary me-2"></i>
+                                                {{ appointment.date }}
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="fas fa-clock text-primary me-2"></i>
+                                                {{ appointment.time }}
+                                            </div>
+                                        </div>
+                                        {% if appointment.reason %}
+                                            <div class="mt-3 p-3 rounded-3" style="background: var(--gray-50);">
+                                                <i class="fas fa-info-circle text-primary me-1"></i>
+                                                <span class="small">{{ appointment.reason }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-4x text-muted mb-3 opacity-50"></i>
+                            <p class="text-muted mb-3">No upcoming appointments</p>
+                            <a href="{{ url_for('consult_doctor') }}" class="btn btn-gradient btn-modern">
+                                <i class="fas fa-plus"></i> Book Appointment
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Recent Consultations -->
+                <div class="glass-card-viz slide-up">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-history gradient-text me-2"></i>
+                            Recent Consultations
+                        </h3>
+                        <a href="{{ url_for('consultation_history') }}" class="btn btn-modern btn-sm hover-lift">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    {% if recent_consultations and recent_consultations|length > 0 %}
+                        {% for consultation in recent_consultations[:3] %}
+                            <div class="data-card-interactive mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">Dr. {{ consultation.doctor_name }}</h6>
+                                        <p class="text-muted small mb-2">{{ consultation.specialization }}</p>
+                                        <div class="small">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            {{ consultation.date }}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if consultation.prescription %}
+                                            <a href="{{ url_for('view_prescription', appointment_id=consultation.id) }}" 
+                                               class="btn btn-modern btn-sm mb-2 hover-lift">
+                                                <i class="fas fa-prescription"></i> View Rx
+                                            </a>
+                                        {% endif %}
+                                        <div class="small">
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3 opacity-50"></i>
+                            <p class="text-muted">No consultation history yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Health Score Card -->
+                <div class="glass-card-viz mb-4 text-center slide-up">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-heartbeat gradient-text me-2"></i>
+                        Health Score
+                    </h4>
+                    
+                    <div class="radial-progress mx-auto mb-3">
+                        <svg viewBox="0 0 160 160" class="radial-progress-circle">
+                            <defs>
+                                <linearGradient id="radial-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="80" cy="80" r="70" class="radial-progress-bg"></circle>
+                            <circle cx="80" cy="80" r="70" class="radial-progress-fill" 
+                                    style="stroke-dashoffset: {{ 440 - (440 * 0.85) }};"></circle>
+                        </svg>
+                        <div class="radial-progress-text">
+                            <div class="counter-animated" style="font-size: 2.5rem; color: var(--success);">85</div>
+                            <div class="small text-muted fw-bold">Excellent</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-start">
+                        <div class="metric-display mb-2">
+                            <div>
+                                <div class="small text-muted">Activity Level</div>
+                                <div class="fw-bold">High</div>
+                            </div>
+                            <i class="fas fa-running fa-2x text-success"></i>
+                        </div>
+                        <div class="metric-display mb-2">
+                            <div>
+                                <div class="small text-muted">Last Checkup</div>
+                                <div class="fw-bold">2 weeks ago</div>
+                            </div>
+                            <i class="fas fa-check-circle fa-2x text-primary"></i>
+                        </div>
+                        <div class="metric-display">
+                            <div>
+                                <div class="small text-muted">Next Appointment</div>
+                                <div class="fw-bold">In 3 days</div>
+                            </div>
+                            <i class="fas fa-calendar fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Services -->
+                <div class="glass-card-viz mb-4 slide-up">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-th-large gradient-text me-2"></i>
+                        Health Services
+                    </h4>
+                    
+                    <a href="{{ url_for('patient_medical_records') }}" class="d-block text-decoration-none mb-3">
+                        <div class="data-card-interactive p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-animated me-3" style="width: 48px; height: 48px; font-size: 20px; background: var(--viz-gradient-1);">
+                                    <i class="fas fa-folder-open"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Medical Records</div>
+                                    <div class="small text-muted">View your health history</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('patient_appointments') }}" class="d-block text-decoration-none mb-3">
+                        <div class="data-card-interactive p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-animated me-3" style="width: 48px; height: 48px; font-size: 20px; background: var(--viz-gradient-3);">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">All Appointments</div>
+                                    <div class="small text-muted">Manage your schedule</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('consultation_history') }}" class="d-block text-decoration-none mb-3">
+                        <div class="data-card-interactive p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-animated me-3" style="width: 48px; height: 48px; font-size: 20px; background: var(--viz-gradient-4);">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Full History</div>
+                                    <div class="small text-muted">Past consultations</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('patient_profile') }}" class="d-block text-decoration-none">
+                        <div class="data-card-interactive p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-animated me-3" style="width: 48px; height: 48px; font-size: 20px; background: var(--viz-gradient-5);">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">My Profile</div>
+                                    <div class="small text-muted">Update information</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Health Tip -->
+                <div class="glass-card-viz slide-up" style="background: var(--gradient-primary); color: white;">
+                    <div class="text-center">
+                        <i class="fas fa-lightbulb fa-3x mb-3" style="opacity: 0.9; animation: pulse 2s ease-in-out infinite;"></i>
+                        <h5 class="fw-bold mb-3">Health Tip of the Day</h5>
+                        <p class="mb-0" style="opacity: 0.95;">
+                            Stay hydrated! Drink at least 8 glasses of water daily to maintain optimal health and energy levels.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Action Button -->
+<a href="{{ url_for('consult_doctor') }}" class="fab" title="Find Doctor">
+    <i class="fas fa-user-md"></i>
+</a>
+
+<style>
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+</style>
+{% endblock %}

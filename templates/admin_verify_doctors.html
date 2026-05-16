@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Doctors - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .verification-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-pending {
+            background: #ffc107;
+            color: #000;
+        }
+        .badge-verified {
+            background: #28a745;
+            color: white;
+        }
+        .badge-rejected {
+            background: #dc3545;
+            color: white;
+        }
+        .verification-id {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 14px;
+        }
+        .btn-verify {
+            background: #28a745;
+            color: white;
+        }
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-user-shield"></i> Admin Dashboard
+            </a>
+            <div>
+                <span class="text-white me-3">{{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-user-check"></i> Doctor Verification</h2>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-number">{{ stats.pending }}</div>
+                    <div class="text-muted">Pending Verification</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-number">{{ stats.verified }}</div>
+                    <div class="text-muted">Verified Doctors</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stat-number">{{ stats.rejected }}</div>
+                    <div class="text-muted">Rejected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if filter == 'pending' else '' }}" 
+                   href="?filter=pending">
+                    Pending ({{ stats.pending }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if filter == 'verified' else '' }}" 
+                   href="?filter=verified">
+                    Verified ({{ stats.verified }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if filter == 'rejected' else '' }}" 
+                   href="?filter=rejected">
+                    Rejected ({{ stats.rejected }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if filter == 'all' else '' }}" 
+                   href="?filter=all">
+                    All ({{ stats.total }})
+                </a>
+            </li>
+        </ul>
+
+        <!-- Doctors List -->
+        {% if doctors %}
+            {% for doctor in doctors %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-2">
+                                <i class="fas fa-user-md text-primary"></i> {{ doctor.name }}
+                            </h5>
+                            <p class="mb-1">
+                                <i class="fas fa-envelope text-muted"></i> {{ doctor.email }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-phone text-muted"></i> {{ doctor.phone }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-stethoscope text-muted"></i> {{ doctor.specialization }}
+                            </p>
+                            {% if doctor.verification_id %}
+                            <p class="mb-0">
+                                <i class="fas fa-id-card text-muted"></i> 
+                                <span class="verification-id">{{ doctor.verification_id }}</span>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 text-center">
+                            {% if doctor.verification_status == 'Pending' %}
+                                <span class="verification-badge badge-pending">
+                                    <i class="fas fa-clock"></i> PENDING
+                                </span>
+                            {% elif doctor.verification_status == 'Verified' %}
+                                <span class="verification-badge badge-verified">
+                                    <i class="fas fa-check-circle"></i> VERIFIED
+                                </span>
+                            {% elif doctor.verification_status == 'Rejected' %}
+                                <span class="verification-badge badge-rejected">
+                                    <i class="fas fa-times-circle"></i> REJECTED
+                                </span>
+                            {% endif %}
+                            <div class="mt-2 text-muted small">
+                                Registered: {{ doctor.created_at[:10] }}
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <!-- View Documents Button -->
+                            {% if doctor.documents_uploaded %}
+                            <button type="button" class="btn btn-info btn-sm w-100 mb-2" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#documentsModal{{ doctor.doctor_id }}">
+                                <i class="fas fa-file-pdf"></i> View Documents
+                            </button>
+                            {% endif %}
+                            
+                            {% if doctor.verification_status == 'Pending' %}
+                                <form method="POST" action="{{ url_for('admin_verify_doctor', doctor_id=doctor.doctor_id) }}" class="d-inline">
+                                    <input type="hidden" name="action" value="verify">
+                                    <button type="submit" class="btn btn-verify btn-sm mb-2 w-100">
+                                        <i class="fas fa-check"></i> Verify
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('admin_verify_doctor', doctor_id=doctor.doctor_id) }}" class="d-inline">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-reject btn-sm w-100">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </form>
+                            {% elif doctor.verification_status == 'Verified' %}
+                                <button class="btn btn-success btn-sm w-100" disabled>
+                                    <i class="fas fa-check-circle"></i> Verified
+                                </button>
+                                <form method="POST" action="{{ url_for('admin_verify_doctor', doctor_id=doctor.doctor_id) }}" class="d-inline mt-2">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="fas fa-ban"></i> Revoke
+                                    </button>
+                                </form>
+                            {% elif doctor.verification_status == 'Rejected' %}
+                                <form method="POST" action="{{ url_for('admin_verify_doctor', doctor_id=doctor.doctor_id) }}" class="d-inline">
+                                    <input type="hidden" name="action" value="verify">
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="fas fa-redo"></i> Re-verify
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                                <i class="fas fa-edit"></i> Edit Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Documents Modal -->
+            {% if doctor.documents_uploaded %}
+            <div class="modal fade" id="documentsModal{{ doctor.doctor_id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-file-pdf"></i> Documents - {{ doctor.name }}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6 class="mb-3">Doctor Information:</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ doctor.name }}</p>
+                                    <p><strong>Email:</strong> {{ doctor.email }}</p>
+                                    <p><strong>Phone:</strong> {{ doctor.phone }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+                                    <p><strong>Experience:</strong> {{ doctor.experience }} years</p>
+                                    <p><strong>Verification ID:</strong> <span class="verification-id">{{ doctor.verification_id }}</span></p>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <h6 class="mb-3">Uploaded Documents:</h6>
+                            
+                            <!-- Degree Certificate -->
+                            {% if doctor.degree_certificate_path %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-graduation-cap text-primary"></i> 
+                                        Medical Degree Certificate
+                                    </h6>
+                                    <p class="text-muted small mb-2">MBBS/MD/MS Certificate</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('admin_view_document', doctor_id=doctor.doctor_id, doc_type='degree') }}" 
+                                           target="_blank" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('admin_view_document', doctor_id=doctor.doctor_id, doc_type='degree') }}?download=1" 
+                                           class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Council Registration -->
+                            {% if doctor.council_registration_path %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-id-card text-success"></i> 
+                                        Medical Council Registration
+                                    </h6>
+                                    <p class="text-muted small mb-2">MCI/State Medical Council Certificate</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('admin_view_document', doctor_id=doctor.doctor_id, doc_type='council') }}" 
+                                           target="_blank" 
+                                           class="btn btn-success btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('admin_view_document', doctor_id=doctor.doctor_id, doc_type='council') }}?download=1" 
+                                           class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Verification Form -->
+                            <hr>
+                            <h6 class="mb-3">Verification Decision:</h6>
+                            <form method="POST" action="{{ url_for('admin_verify_doctor', doctor_id=doctor.doctor_id) }}">
+                                <div class="mb-3">
+                                    <label class="form-label">Admin Notes (Optional):</label>
+                                    <textarea name="notes" class="form-control" rows="2" 
+                                              placeholder="Add any notes about this verification..."></textarea>
+                                </div>
+                                
+                                {% if doctor.verification_status == 'Pending' %}
+                                <div class="mb-3">
+                                    <label class="form-label">Rejection Reason (if rejecting):</label>
+                                    <textarea name="rejection_reason" class="form-control" rows="2" 
+                                              placeholder="Reason for rejection (required if rejecting)"></textarea>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" name="action" value="verify" class="btn btn-success flex-fill">
+                                        <i class="fas fa-check"></i> Approve & Verify
+                                    </button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger flex-fill">
+                                        <i class="fas fa-times"></i> Reject Application
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No doctors found in this category.
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

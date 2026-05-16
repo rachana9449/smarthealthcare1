@@ -1,0 +1,129 @@
+{% extends "base_clean.html" %}
+{% block title %}Notifications - MediConnect{% endblock %}
+
+{% block content %}
+<div style="padding:28px 0 60px;background:#f0f2f8;min-height:100vh;">
+<div class="container" style="max-width:820px;">
+
+  <!-- Header -->
+  <div style="background:#fff;border-radius:18px;box-shadow:0 4px 24px rgba(102,126,234,.10);border-left:5px solid #667eea;margin-bottom:28px;padding:26px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(102,126,234,.35);position:relative;">
+        <i class="fas fa-bell" style="color:#fff;font-size:1.4rem;"></i>
+        {% set unread_count = notifications | selectattr('is_read', 'equalto', false) | list | length %}
+        {% if unread_count > 0 %}
+        <span id="header-badge" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;">{{ unread_count }}</span>
+        {% endif %}
+      </div>
+      <div>
+        <h2 style="margin:0;font-family:'Poppins',sans-serif;font-weight:700;color:#2d3748;font-size:1.6rem;">Notifications</h2>
+        <p id="header-sub" style="margin:0;color:#64748b;font-size:.92rem;">
+          {% if unread_count > 0 %}{{ unread_count }} unread notification{{ 's' if unread_count != 1 else '' }}{% else %}All caught up!{% endif %}
+        </p>
+      </div>
+    </div>
+    {% if notifications %}
+    <button onclick="markAllAsRead()"
+            style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;padding:11px 22px;font-weight:600;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(102,126,234,.30);">
+      <i class="fas fa-check-double"></i> Mark All Read
+    </button>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+  <div id="notifications-list">
+    {% for n in notifications %}
+    {% set is_em = n.type == 'emergency' %}
+    {% set is_unread = not n.is_read %}
+    <div class="notif-item" id="notif-{{ n.id }}"
+         style="background:{% if is_em %}#fff5f5{% elif is_unread %}#f8f9ff{% else %}#fff{% endif %};border-radius:16px;box-shadow:0 3px 16px rgba(0,0,0,{% if is_unread %}.09{% else %}.06{% endif %});border-left:5px solid {% if is_em %}#ef4444{% elif is_unread %}#667eea{% else %}#e2e8f0{% endif %};margin-bottom:14px;padding:18px 22px;display:flex;align-items:flex-start;gap:16px;transition:transform .2s,box-shadow .2s;position:relative;"
+         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.12)'"
+         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 16px rgba(0,0,0,.07)'">
+
+      {% if is_unread %}<div class="unread-dot-{{ n.id }}" style="position:absolute;top:18px;right:18px;width:10px;height:10px;border-radius:50%;background:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.2);"></div>{% endif %}
+
+      <!-- Icon -->
+      <div style="flex-shrink:0;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{% if is_em %}linear-gradient(135deg,#ef4444,#dc2626){% elif n.type=='appointment' %}linear-gradient(135deg,#4facfe,#667eea){% elif n.type=='consultation' %}linear-gradient(135deg,#10b981,#059669){% elif n.type=='feedback' %}linear-gradient(135deg,#f59e0b,#d97706){% else %}linear-gradient(135deg,#94a3b8,#64748b){% endif %};box-shadow:0 4px 14px rgba(0,0,0,.15);">
+        <i class="fas fa-{% if is_em %}exclamation-triangle{% elif n.type=='appointment' %}calendar-check{% elif n.type=='consultation' %}user-md{% elif n.type=='feedback' %}star{% else %}info-circle{% endif %}" style="color:#fff;font-size:1.1rem;"></i>
+      </div>
+
+      <!-- Content -->
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:0;">
+            <h6 style="margin:0 0 5px;font-weight:{% if is_unread %}700{% else %}600{% endif %};color:{% if is_em %}#b91c1c{% else %}#1e293b{% endif %};font-size:.97rem;line-height:1.3;">{{ n.title }}</h6>
+            <p style="margin:0 0 8px;color:{% if is_em %}#dc2626{% else %}#475569{% endif %};font-size:.88rem;line-height:1.5;font-weight:{% if is_em %}600{% else %}400{% endif %};">{{ n.message }}</p>
+            <span style="color:#94a3b8;font-size:.78rem;"><i class="fas fa-clock me-1"></i>{{ n.created_at }}</span>
+          </div>
+          <div style="flex-shrink:0;padding-top:2px;">
+            {% if is_unread %}
+            <button onclick="markAsRead({{ n.id }})" id="btn-{{ n.id }}"
+                    style="background:transparent;color:#667eea;border:2px solid #667eea;border-radius:8px;padding:6px 14px;font-weight:600;font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;"
+                    onmouseover="this.style.background='#667eea';this.style.color='#fff'"
+                    onmouseout="this.style.background='transparent';this.style.color='#667eea'">
+              <i class="fas fa-check"></i> Mark Read
+            </button>
+            {% else %}
+            <span id="badge-{{ n.id }}" style="background:#dcfce7;color:#15803d;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;">
+              <i class="fas fa-check-circle"></i> Read
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:72px 32px;text-align:center;">
+    <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#f0f4ff,#e8edff);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+      <i class="fas fa-bell-slash" style="font-size:2.4rem;color:#a5b4fc;"></i>
+    </div>
+    <h4 style="font-family:'Poppins',sans-serif;font-weight:700;color:#2d3748;margin-bottom:10px;">You're all caught up!</h4>
+    <p style="color:#64748b;font-size:.95rem;margin:0;">No notifications at the moment. Check back later.</p>
+  </div>
+  {% endif %}
+
+</div></div>
+
+<script>
+function markAsRead(id){
+  fetch('/api/notifications/'+id+'/read',{method:'POST',headers:{'Content-Type':'application/json'}})
+  .then(r=>r.json()).then(d=>{if(d.success){applyRead(id);updateCount();}});
+}
+function applyRead(id){
+  const item=document.getElementById('notif-'+id);
+  if(!item)return;
+  item.style.transition='opacity .4s,background .4s,border-left-color .4s';
+  item.style.opacity='.6';
+  setTimeout(()=>{
+    const isEm=item.style.borderLeftColor==='rgb(239, 68, 68)';
+    if(!isEm){item.style.background='#fff';item.style.borderLeftColor='#e2e8f0';}
+    item.style.opacity='1';
+    const dot=item.querySelector('[class^="unread-dot"]');if(dot)dot.remove();
+    const btn=document.getElementById('btn-'+id);
+    if(btn)btn.outerHTML='<span id="badge-'+id+'" style="background:#dcfce7;color:#15803d;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;"><i class=\'fas fa-check-circle\'></i> Read</span>';
+    const h=item.querySelector('h6');if(h)h.style.fontWeight='600';
+  },200);
+}
+function markAllAsRead(){
+  fetch('/api/notifications/read-all',{method:'POST',headers:{'Content-Type':'application/json'}})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){
+      document.querySelectorAll('.notif-item').forEach(item=>{
+        const m=item.id.match(/notif-(\d+)/);if(m)applyRead(parseInt(m[1]));
+      });
+      updateCount(0);
+    }
+  });
+}
+function updateCount(force){
+  const sub=document.getElementById('header-sub');
+  const badge=document.getElementById('header-badge');
+  const count=force!==undefined?force:document.querySelectorAll('[id^="btn-"]').length;
+  if(sub)sub.textContent=count>0?count+' unread notification'+(count!==1?'s':''):'All caught up!';
+  if(badge){if(count>0)badge.textContent=count;else badge.remove();}
+}
+</script>
+{% endblock %}

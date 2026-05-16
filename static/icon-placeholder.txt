@@ -1,0 +1,46 @@
+NOTIFICATION ICONS NEEDED:
+
+You need to create 3 icon files:
+
+1. icon-192.png (192x192 pixels)
+2. icon-512.png (512x512 pixels)
+3. badge-72.png (72x72 pixels)
+
+QUICK WAYS TO CREATE:
+
+Option 1: Use Online Icon Generator
+- Go to: https://www.favicon-generator.org/
+- Upload a medical cross image or logo
+- Generate icons in required sizes
+- Download and place in static/ folder
+
+Option 2: Use Canva (Free)
+- Go to: https://www.canva.com/
+- Create design with dimensions:
+  * 192x192 for icon-192.png
+  * 512x512 for icon-512.png
+  * 72x72 for badge-72.png
+- Add medical cross symbol (+ or ⚕️)
+- Use purple/blue gradient background (#667eea to #764ba2)
+- Download as PNG
+- Place in static/ folder
+
+Option 3: Simple Colored Squares (Temporary)
+- Create solid color squares with:
+  * Background: Purple (#667eea)
+  * White medical cross in center
+  * Text: "MS" (Medical System)
+- Use any image editor (Paint, Photoshop, GIMP)
+
+TEMPORARY SOLUTION:
+For now, the system will work without icons.
+Browser will use default notification icon.
+Add proper icons later for professional appearance.
+
+ICON DESIGN SUGGESTIONS:
+- Medical cross (⚕️)
+- Heart with pulse line
+- Stethoscope
+- Purple/blue gradient background
+- White symbol/text
+- Clean, simple design

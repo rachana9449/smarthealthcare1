@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Prescription</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .service-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .service-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        .service-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .prescription-box {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+        }
+        .lab-tests-box {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+        }
+        .btn-find-service {
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('patient_dashboard') }}">
+                <i class="fas fa-user"></i> Patient Dashboard
+            </a>
+            <div>
+                <span class="text-white me-3">{{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-prescription"></i> Your Prescription</h3>
+                    <a href="{{ url_for('patient_appointments') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Appointments
+                    </a>
+                </div>
+
+                <!-- Doctor & Appointment Info -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-user-md text-primary"></i> Dr. {{ appointment.doctor_name }}</h5>
+                                <p class="text-muted mb-1"><i class="fas fa-stethoscope"></i> {{ appointment.specialization }}</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="mb-1"><i class="fas fa-calendar"></i> <strong>Date:</strong> {{ appointment.appointment_date }}</p>
+                                <p class="mb-0"><i class="fas fa-clock"></i> <strong>Time:</strong> {{ appointment.appointment_time }}</p>
+                            </div>
+                        </div>
+                        {% if appointment.reason %}
+                        <hr>
+                        <p class="mb-0"><strong>Reason for Visit:</strong> {{ appointment.reason }}</p>
+                        {% endif %}
+                        {% if appointment.notes %}
+                        <div class="alert alert-info mt-3 mb-0">
+                            <strong><i class="fas fa-notes-medical"></i> Diagnosis/Notes:</strong><br>
+                            {{ appointment.notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Prescription Section -->
+                    {% if appointment.prescription %}
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-pills"></i> Prescribed Medicines</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="prescription-box">{{ appointment.prescription }}</div>
+                                
+                                <div class="d-grid gap-2 mt-3">
+                                    <a href="{{ url_for('nearby_services_general') }}?type=pharmacy&appointment_id={{ appointment.id }}" 
+                                       class="btn btn-success btn-find-service">
+                                        <i class="fas fa-map-marker-alt"></i> Find Nearby Medical Stores
+                                    </a>
+                                    <button class="btn btn-outline-success" onclick="window.print()">
+                                        <i class="fas fa-print"></i> Print Prescription
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Lab Tests Section -->
+                    {% if appointment.lab_tests %}
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-flask"></i> Recommended Lab Tests</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="lab-tests-box">{{ appointment.lab_tests }}</div>
+                                
+                                <div class="d-grid gap-2 mt-3">
+                                    <a href="{{ url_for('nearby_services_general') }}?type=diagnostic&appointment_id={{ appointment.id }}" 
+                                       class="btn btn-primary btn-find-service">
+                                        <i class="fas fa-flask"></i> Find Nearby Labs
+                                    </a>
+                                    <a href="{{ url_for('nearby_services_general') }}?type=ct_scan&appointment_id={{ appointment.id }}" 
+                                       class="btn btn-info btn-find-service">
+                                        <i class="fas fa-x-ray"></i> Find CT Scan Centers
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Find All Services -->
+                {% if appointment.prescription and appointment.lab_tests %}
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h5><i class="fas fa-lightbulb text-warning"></i> Need Everything?</h5>
+                        <p class="mb-3">Find all nearby medical stores, labs, and diagnostic centers in one place</p>
+                        <a href="{{ url_for('nearby_services_general') }}?type=all&appointment_id={{ appointment.id }}" 
+                           class="btn btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <i class="fas fa-map-marked-alt"></i> Find All Nearby Services
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Quick Service Cards -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-hospital"></i> Quick Access to Services</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="service-card" onclick="window.location.href='{{ url_for('nearby_services_general') }}?type=pharmacy&appointment_id={{ appointment.id }}'">
+                                    <div class="service-icon text-success">
+                                        <i class="fas fa-pills"></i>
+                                    </div>
+                                    <h5>Medical Stores</h5>
+                                    <p class="text-muted">Find nearby pharmacies for your medicines</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="service-card" onclick="window.location.href='{{ url_for('nearby_services_general') }}?type=diagnostic&appointment_id={{ appointment.id }}'">
+                                    <div class="service-icon text-primary">
+                                        <i class="fas fa-flask"></i>
+                                    </div>
+                                    <h5>Diagnostic Labs</h5>
+                                    <p class="text-muted">Find labs for blood tests and diagnostics</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="service-card" onclick="window.location.href='{{ url_for('nearby_services_general') }}?type=ct_scan&appointment_id={{ appointment.id }}'">
+                                    <div class="service-icon text-info">
+                                        <i class="fas fa-x-ray"></i>
+                                    </div>
+                                    <h5>CT Scan Centers</h5>
+                                    <p class="text-muted">Find imaging and CT scan facilities</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-info-circle"></i> <strong>Important Instructions:</strong></h6>
+                    <ul class="mb-0">
+                        <li>Follow the prescribed dosage and timing strictly</li>
+                        <li>Complete the full course of medicines even if you feel better</li>
+                        <li>Get the lab tests done as soon as possible</li>
+                        <li>Keep this prescription for your records</li>
+                        <li>Contact your doctor if you experience any side effects</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

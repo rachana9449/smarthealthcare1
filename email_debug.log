@@ -1,0 +1,13 @@
+
+[2026-05-15 11:38:34.477546] Sending acceptance email
+  To: jainrachanaga@gmail.com
+  Patient: rachana jain
+  Doctor: Abhilasha
+  Result: True
+  ERROR: 'charmap' codec can't encode character '\u2705' in position 18: character maps to <undefined>
+
+[2026-05-15 11:49:48.467816] Sending acceptance email
+  To: jainrachanaga@gmail.com
+  Patient: rachana jain
+  Doctor: Abhilasha
+  Result: True

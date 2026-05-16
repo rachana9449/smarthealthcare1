@@ -1,0 +1,148 @@
+{% extends "base_clean.html" %}
+{% block title %}Consult a Doctor{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="glass-card mb-4">
+        <div class="d-flex align-items-center mb-3">
+            <div class="animated-icon me-3" style="font-size: 2rem; color: #11998e;">
+                <i class="fas fa-hospital"></i>
+            </div>
+            <div>
+                <h2 class="mb-0">Find a Doctor</h2>
+                <p class="text-muted mb-0">Search and filter doctors by specialty, rating, and more</p>
+            </div>
+        </div>
+
+        <!-- Advanced Search & Filters -->
+        <form method="GET" class="no-loading">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label"><i class="fas fa-search me-2"></i>Search</label>
+                    <input type="text" class="form-control" name="search" 
+                           placeholder="Doctor name or specialty..." value="{{ search }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label"><i class="fas fa-stethoscope me-2"></i>Specialization</label>
+                    <select class="form-select" name="specialization">
+                        <option value="all" {% if selected_specialization == 'all' %}selected{% endif %}>All Specializations</option>
+                        {% for spec in specializations %}
+                        <option value="{{ spec.specialization }}" {% if selected_specialization == spec.specialization %}selected{% endif %}>
+                            {{ spec.specialization }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label"><i class="fas fa-star me-2"></i>Min Rating</label>
+                    <select class="form-select" name="min_rating">
+                        <option value="0" {% if min_rating == '0' %}selected{% endif %}>Any</option>
+                        <option value="3" {% if min_rating == '3' %}selected{% endif %}>3+ Stars</option>
+                        <option value="4" {% if min_rating == '4' %}selected{% endif %}>4+ Stars</option>
+                        <option value="4.5" {% if min_rating == '4.5' %}selected{% endif %}>4.5+ Stars</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label"><i class="fas fa-sort me-2"></i>Sort By</label>
+                    <select class="form-select" name="sort_by">
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+                        <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Rating</option>
+                        <option value="experience" {% if sort_by == 'experience' %}selected{% endif %}>Experience</option>
+                        <option value="fee_low" {% if sort_by == 'fee_low' %}selected{% endif %}>Fee (Low to High)</option>
+                        <option value="fee_high" {% if sort_by == 'fee_high' %}selected{% endif %}>Fee (High to Low)</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-modern btn-gradient-success w-100">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Count -->
+    {% if doctors %}
+    <div class="mb-3">
+        <p class="text-muted"><i class="fas fa-info-circle me-2"></i>Found {{ doctors|length }} doctor(s)</p>
+    </div>
+    {% endif %}
+
+    <!-- Doctors Grid -->
+    {% if doctors %}
+    <div class="row">
+        {% for doctor in doctors %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="stat-card h-100">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="stat-icon me-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">Dr. {{ doctor.name }}</h5>
+                        <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            {{ doctor.specialization }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted"><i class="fas fa-briefcase me-2"></i>Experience:</span>
+                        <strong>{{ doctor.experience }} years</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted"><i class="fas fa-rupee-sign me-2"></i>Fee:</span>
+                        <strong>₹{{ doctor.consultation_fee }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted"><i class="fas fa-star me-2"></i>Rating:</span>
+                        <strong>
+                            {% if doctor.avg_rating > 0 %}
+                                {{ "%.1f"|format(doctor.avg_rating) }} ⭐
+                            {% else %}
+                                No ratings yet
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="fas fa-users me-2"></i>Consultations:</span>
+                        <strong>{{ doctor.total_consultations }}</strong>
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="{{ url_for('book_appointment', doctor_id=doctor.doctor_id) }}" 
+                       class="btn btn-modern btn-gradient-primary btn-lg"
+                       title="Schedule an appointment with this doctor">
+                        <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                        <small class="d-block" style="font-size: 0.75rem; opacity: 0.9;">Choose online or in-person consultation</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="glass-card text-center py-5">
+        <div class="animated-icon mb-3" style="font-size: 4rem; color: #ccc;">
+            <i class="fas fa-user-md"></i>
+        </div>
+        <h4 class="text-muted">No doctors found</h4>
+        <p class="text-muted">Try adjusting your search filters</p>
+        <a href="{{ url_for('consult_doctor') }}" class="btn btn-modern btn-gradient-primary">
+            <i class="fas fa-redo me-2"></i>Clear Filters
+        </a>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

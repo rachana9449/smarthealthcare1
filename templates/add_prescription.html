@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Prescription</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .patient-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('doctor_dashboard') }}">
+                <i class="fas fa-user-md"></i> Doctor Dashboard
+            </a>
+            <div>
+                <span class="text-white me-3">Dr. {{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4><i class="fas fa-prescription"></i> Add Prescription</h4>
+                            <a href="{{ url_for('doctor_appointments') }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <!-- Patient Information -->
+                        <div class="patient-info">
+                            <h5 class="mb-3"><i class="fas fa-user"></i> Patient Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Name:</strong> {{ appointment.patient_name }}</p>
+                                    <p class="mb-2"><strong>Email:</strong> {{ appointment.patient_email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Date:</strong> {{ appointment.appointment_date }}</p>
+                                    <p class="mb-2"><strong>Time:</strong> {{ appointment.appointment_time }}</p>
+                                </div>
+                            </div>
+                            {% if appointment.reason %}
+                            <p class="mb-0"><strong>Reason:</strong> {{ appointment.reason }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Prescription Form -->
+                        <form method="POST">
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-pills"></i> Prescription / Medicines
+                                </label>
+                                <textarea class="form-control" name="prescription" rows="6" 
+                                          placeholder="Enter prescribed medicines, dosage, and instructions...&#10;&#10;Example:&#10;1. Paracetamol 500mg - 1 tablet twice daily after meals&#10;2. Amoxicillin 250mg - 1 capsule three times daily&#10;3. Vitamin D3 - 1 tablet once daily">{{ appointment.prescription or '' }}</textarea>
+                                <small class="text-muted">List all prescribed medicines with dosage and instructions</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-flask"></i> Lab Tests / Diagnostic Tests
+                                </label>
+                                <textarea class="form-control" name="lab_tests" rows="4" 
+                                          placeholder="Enter recommended lab tests or diagnostic procedures...&#10;&#10;Example:&#10;1. Complete Blood Count (CBC)&#10;2. Blood Sugar (Fasting)&#10;3. X-Ray Chest PA View">{{ appointment.lab_tests or '' }}</textarea>
+                                <small class="text-muted">List all recommended tests and procedures</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-notes-medical"></i> Additional Notes (Optional)
+                                </label>
+                                <textarea class="form-control" name="notes" rows="3" 
+                                          placeholder="Any additional instructions or notes for the patient...">{{ appointment.notes or '' }}</textarea>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Note:</strong> After saving, the patient will be notified and can find nearby pharmacies and diagnostic centers.
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save"></i> Save Prescription
+                                </button>
+                                <a href="{{ url_for('doctor_appointments') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% extends "base_clean.html" %}
+{% block title %}Doctor Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4" style="color: #333;">
+        <i class="fas fa-user-md"></i> Doctor Profile
+    </h2>
+    
+    <div class="card shadow-lg">
+        <div class="card-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+            <h4 class="mb-0"><i class="fas fa-id-card"></i> Professional Information</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    <div class="bg-light rounded-circle p-5 d-inline-block mb-3" style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user-md fa-5x text-success"></i>
+                    </div>
+                    <h5 class="badge bg-success p-2" style="font-size: 16px;">Doctor</h5>
+                </div>
+                <div class="col-md-9">
+                    <table class="table table-borderless table-striped">
+                        <tbody>
+                            <tr>
+                                <td width="35%" class="fw-bold"><i class="fas fa-user-md text-success"></i> Doctor name:</td>
+                                <td>Dr. {{ user.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-envelope text-success"></i> Email:</td>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-phone text-success"></i> Phone:</td>
+                                <td>{{ user.phone }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-stethoscope text-success"></i> Specialization:</td>
+                                <td><span class="badge bg-primary">{{ doctor.specialization }}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-graduation-cap text-success"></i> Qualification:</td>
+                                <td>{{ doctor.qualification }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-briefcase text-success"></i> Experience:</td>
+                                <td>{{ doctor.experience }} years</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-rupee-sign text-success"></i> Consultation Fee:</td>
+                                <td><strong>₹{{ doctor.consultation_fee }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,360 @@
+<!-- Interactive Dashboard Tooltips Implementation -->
+<!-- Add this to your dashboard templates for enhanced user experience -->
+
+<style>
+/* Interactive Dashboard Tooltips */
+.dashboard-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.dashboard-tooltip-content {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 250px;
+    max-width: 350px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.dashboard-tooltip:hover .dashboard-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+    bottom: 130%;
+}
+
+.dashboard-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: rgba(255, 255, 255, 0.98);
+}
+
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.tooltip-icon {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.tooltip-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.tooltip-description {
+    color: #666;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.tooltip-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.tooltip-stat {
+    text-align: center;
+    flex: 1;
+}
+
+.tooltip-stat-value {
+    font-weight: 700;
+    color: #667eea;
+    font-size: 16px;
+    display: block;
+}
+
+.tooltip-stat-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Animated Progress Tooltips */
+.progress-tooltip {
+    position: relative;
+}
+
+.progress-tooltip-content {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.progress-tooltip:hover .progress-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+    top: -65px;
+}
+
+.progress-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #667eea;
+}
+
+/* Chart Tooltips */
+.chart-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.chart-tooltip.show {
+    opacity: 1;
+}
+
+/* Status Indicator Tooltips */
+.status-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    position: relative;
+}
+
+.status-indicator.online {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.offline {
+    background: #ef4444;
+}
+
+.status-indicator.busy {
+    background: #f59e0b;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.status-tooltip-content {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.status-tooltip:hover .status-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.status-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #333;
+}
+</style>
+
+<!-- Example Dashboard Elements with Tooltips -->
+
+<!-- Stats Card with Tooltip -->
+<div class="col-md-3">
+    <div class="card glass-card">
+        <div class="card-body text-center">
+            <div class="dashboard-tooltip">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <div class="dashboard-tooltip-content">
+                    <div class="tooltip-header">
+                        <div class="tooltip-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="tooltip-title">Total Patients</div>
+                    </div>
+                    <div class="tooltip-description">
+                        Active registered patients in your practice. Includes verified accounts with complete profiles.
+                    </div>
+                    <div class="tooltip-stats">
+                        <div class="tooltip-stat">
+                            <span class="tooltip-stat-value">+12%</span>
+                            <span class="tooltip-stat-label">This Month</span>
+                        </div>
+                        <div class="tooltip-stat">
+                            <span class="tooltip-stat-value">89%</span>
+                            <span class="tooltip-stat-label">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="card-title">1,234</h3>
+            <p class="card-text text-muted">Total Patients</p>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar with Tooltip -->
+<div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="text-sm font-medium">Appointment Completion</span>
+        <div class="progress-tooltip">
+            <span class="text-sm text-muted">85%</span>
+            <div class="progress-tooltip-content">
+                85% of scheduled appointments completed successfully this month
+            </div>
+        </div>
+    </div>
+    <div class="progress" style="height: 8px;">
+        <div class="progress-bar bg-gradient-primary" style="width: 85%"></div>
+    </div>
+</div>
+
+<!-- Status Indicators with Tooltips -->
+<div class="d-flex align-items-center mb-2">
+    <div class="status-tooltip">
+        <span class="status-indicator online"></span>
+        <div class="status-tooltip-content">Online - Available for consultations</div>
+    </div>
+    <span class="ms-2">Dr. Sarah Johnson</span>
+</div>
+
+<div class="d-flex align-items-center mb-2">
+    <div class="status-tooltip">
+        <span class="status-indicator busy"></span>
+        <div class="status-tooltip-content">Busy - In consultation until 3:30 PM</div>
+    </div>
+    <span class="ms-2">Dr. Michael Chen</span>
+</div>
+
+<div class="d-flex align-items-center mb-2">
+    <div class="status-tooltip">
+        <span class="status-indicator offline"></span>
+        <div class="status-tooltip-content">Offline - Next available tomorrow 9:00 AM</div>
+    </div>
+    <span class="ms-2">Dr. Emily Davis</span>
+</div>
+
+<script>
+// Interactive Chart Tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart hover tooltips (for Chart.js integration)
+    const chartTooltip = document.createElement('div');
+    chartTooltip.className = 'chart-tooltip';
+    document.body.appendChild(chartTooltip);
+    
+    // Simulated chart hover (replace with actual chart library integration)
+    document.querySelectorAll('.chart-element').forEach(element => {
+        element.addEventListener('mouseenter', function(e) {
+            const data = this.dataset;
+            chartTooltip.innerHTML = `
+                <strong>${data.label}</strong><br>
+                Value: ${data.value}<br>
+                Change: ${data.change}
+            `;
+            chartTooltip.style.left = e.pageX + 10 + 'px';
+            chartTooltip.style.top = e.pageY - 10 + 'px';
+            chartTooltip.classList.add('show');
+        });
+        
+        element.addEventListener('mouseleave', function() {
+            chartTooltip.classList.remove('show');
+        });
+        
+        element.addEventListener('mousemove', function(e) {
+            chartTooltip.style.left = e.pageX + 10 + 'px';
+            chartTooltip.style.top = e.pageY - 10 + 'px';
+        });
+    });
+    
+    // Dynamic tooltip positioning to prevent overflow
+    document.querySelectorAll('.dashboard-tooltip').forEach(tooltip => {
+        tooltip.addEventListener('mouseenter', function() {
+            const tooltipContent = this.querySelector('.dashboard-tooltip-content');
+            const rect = tooltipContent.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            
+            // Adjust position if tooltip goes off-screen
+            if (rect.right > viewportWidth) {
+                tooltipContent.style.left = 'auto';
+                tooltipContent.style.right = '0';
+                tooltipContent.style.transform = 'none';
+            }
+            
+            if (rect.left < 0) {
+                tooltipContent.style.left = '0';
+                tooltipContent.style.right = 'auto';
+                tooltipContent.style.transform = 'none';
+            }
+        });
+    });
+});
+</script>

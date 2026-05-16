@@ -1,0 +1,374 @@
+{% extends "base_clean.html" %}
+{% block title %}Doctor Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<!-- Welcome Hero -->
+<section class="py-5" style="background: var(--gradient-primary);">
+    <div class="container">
+        <div class="row align-items-center text-white py-4">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-3">Welcome, Dr. {{ session.name }}! 👨‍⚕️</h1>
+                <p class="lead mb-0">Your practice dashboard at a glance</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-inline-block text-start">
+                    <div class="small opacity-75">Verification Status</div>
+                    <div class="fs-5 fw-bold">Verified Doctor</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section class="py-4" style="background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="text-center">
+                    <div class="fs-3 fw-bold gradient-text">{{ stats.today_consultations|default(0) }}</div>
+                    <div class="small text-muted">Today</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center">
+                    <div class="fs-3 fw-bold gradient-text">{{ stats.pending_consultations|default(0) }}</div>
+                    <div class="small text-muted">Pending</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center">
+                    <div class="fs-3 fw-bold gradient-text">{{ stats.total_patients|default(0) }}</div>
+                    <div class="small text-muted">Total Patients</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-center">
+                    <div class="fs-3 fw-bold gradient-text">{{ stats.completed_consultations|default(0) }}</div>
+                    <div class="small text-muted">Completed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Main Dashboard -->
+<section class="py-5" style="background: var(--gray-50);">
+    <div class="container">
+        <!-- Quick Actions -->
+        <div class="mb-5">
+            <h2 class="fw-bold mb-4">Quick Actions</h2>
+            <div class="dashboard-grid">
+                <!-- Consultations -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+                        <i class="fas fa-stethoscope text-white"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.pending_consultations|default(0) }}</div>
+                    <div class="stat-label mb-3">Pending Consults</div>
+                    <p class="text-muted small mb-3">Active consultations requiring your attention</p>
+                    <a href="{{ url_for('doctor_consultations') }}" class="btn btn-gradient btn-modern w-100">
+                        <i class="fas fa-comments"></i> View Consults
+                    </a>
+                </div>
+                
+                <!-- Appointments -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.today_consultations|default(0) }}</div>
+                    <div class="stat-label mb-3">Today's Schedule</div>
+                    <p class="text-muted small mb-3">View and manage your appointments for today</p>
+                    <a href="{{ url_for('doctor_appointments') }}" class="btn btn-modern w-100" style="background: var(--gradient-info); color: white;">
+                        <i class="fas fa-calendar"></i> View Schedule
+                    </a>
+                </div>
+                
+                <!-- Availability -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-clock text-white"></i>
+                    </div>
+                    <div class="stat-number">Set</div>
+                    <div class="stat-label mb-3">Availability</div>
+                    <p class="text-muted small mb-3">Manage your working hours and schedule</p>
+                    <a href="{{ url_for('doctor_availability') }}" class="btn btn-modern w-100" style="background: var(--gradient-success); color: white;">
+                        <i class="fas fa-calendar-alt"></i> Set Hours
+                    </a>
+                </div>
+                
+                <!-- Profile -->
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-user-md text-white"></i>
+                    </div>
+                    <div class="stat-number">Profile</div>
+                    <div class="stat-label mb-3">Your Information</div>
+                    <p class="text-muted small mb-3">Update your professional profile and details</p>
+                    <a href="{{ url_for('doctor_profile') }}" class="btn btn-modern w-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Recent Consultations -->
+                <div class="card-modern mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-history gradient-text me-2"></i>
+                            Recent Consultations
+                        </h3>
+                        <a href="{{ url_for('doctor_consultations') }}" class="btn btn-modern btn-sm">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    {% if recent_consultations and recent_consultations|length > 0 %}
+                        <div class="timeline">
+                            {% for consult in recent_consultations[:5] %}
+                                <div class="timeline-item">
+                                    <div class="appointment-card">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h5 class="fw-bold mb-1">{{ consult.patient_name }}</h5>
+                                                <p class="text-muted small mb-0">{{ consult.patient_email }}</p>
+                                            </div>
+                                            <span class="badge" style="background: linear-gradient(135deg, {{ '#f59e0b' if consult.status == 'pending' else '#10b981' }} 0%, {{ '#d97706' if consult.status == 'pending' else '#059669' }} 100%);">
+                                                <i class="fas fa-{{ 'clock' if consult.status == 'pending' else 'check-circle' }} me-1"></i>
+                                                {{ consult.status|capitalize }}
+                                            </span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="small text-muted mb-1">Symptoms:</div>
+                                            <div class="small">{{ consult.symptoms[:100] }}...</div>
+                                        </div>
+                                        <div class="small">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            {{ consult.consultation_date[:10] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-4x text-muted mb-3 opacity-50"></i>
+                            <p class="text-muted">No recent consultations</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Doctor Tools -->
+                <div class="card-modern mb-4">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-tools gradient-text me-2"></i>
+                        Doctor Tools
+                    </h4>
+                    
+                    <a href="{{ url_for('doctor_appointments') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+                                    <i class="fas fa-calendar-alt text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">All Appointments</div>
+                                    <div class="small text-muted">Manage schedule</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('doctor_consultations') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                                    <i class="fas fa-comments text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Consultations</div>
+                                    <div class="small text-muted">Active & pending</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('doctor_availability') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Availability</div>
+                                    <div class="small text-muted">Set working hours</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('doctor_feedback') }}" class="d-block text-decoration-none mb-3">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                    <i class="fas fa-star text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">Feedback</div>
+                                    <div class="small text-muted">Patient reviews</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{{ url_for('doctor_profile') }}" class="d-block text-decoration-none">
+                        <div class="p-3 rounded-3" style="background: var(--gray-50); transition: all 0.3s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='var(--gray-50)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                    <i class="fas fa-user-md text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">My Profile</div>
+                                    <div class="small text-muted">Update details</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Professional Tip -->
+                <div class="card-modern" style="background: var(--gradient-primary); color: white;">
+                    <div class="text-center">
+                        <i class="fas fa-user-md fa-3x mb-3" style="opacity: 0.9;"></i>
+                        <h5 class="fw-bold mb-3">Professional Tip</h5>
+                        <p class="mb-0 small" style="opacity: 0.95;">
+                            Keep your availability updated to receive more appointment requests. Patients prefer doctors with clear schedules!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Action Button -->
+<a href="{{ url_for('doctor_consultations') }}" class="fab" title="View Consultations">
+    <i class="fas fa-stethoscope"></i>
+</a>
+
+<!-- Live Appointment Notification Container -->
+<div id="liveNotifContainer"></div>
+
+<script>
+// ── Real-time notifications via Server-Sent Events (SSE) ─────────────────
+(function () {
+    var source = new EventSource('/api/doctor/stream');
+
+    source.onmessage = function (e) {
+        try {
+            var data = JSON.parse(e.data);
+            if (data.type === 'heartbeat') return;
+            showLiveNotification(data);
+            bumpBadge();
+        } catch (err) { /* ignore parse errors */ }
+    };
+
+    source.onerror = function () {
+        // SSE auto-reconnects — no action needed
+    };
+
+    function bumpBadge() {
+        var badge = document.getElementById('notificationBadge');
+        if (badge) {
+            var n = (parseInt(badge.textContent) || 0) + 1;
+            badge.textContent = n;
+            badge.style.display = 'inline-block';
+        }
+    }
+
+    function showLiveNotification(data) {
+        var isEmergency = data.type === 'emergency';
+        var container   = document.getElementById('liveNotifContainer');
+
+        // ── Slide-in card ──────────────────────────────────────────────────
+        var card = document.createElement('div');
+        card.className = 'live-notif-card' + (isEmergency ? ' emergency' : '');
+        card.innerHTML =
+            '<div class="live-notif-icon">' + (isEmergency ? '🚨' : '📅') + '</div>' +
+            '<div class="live-notif-body">' +
+              '<div class="notif-title">' + esc(data.title) + '</div>' +
+              '<div class="notif-detail">' +
+                '<strong>Patient:</strong> ' + esc(data.patient_name) + '<br>' +
+                '<strong>Date:</strong> '    + esc(data.appointment_date) + ' at ' + esc(data.appointment_time) + '<br>' +
+                '<strong>Type:</strong> '    + esc(data.consultation_type) +
+                (data.symptoms ? '<br><strong>Reason:</strong> ' + esc(data.symptoms) : '') +
+              '</div>' +
+            '</div>' +
+            '<button class="live-notif-close" title="Dismiss">&times;</button>';
+
+        card.querySelector('.live-notif-close').onclick = function () { card.remove(); };
+        container.prepend(card);
+        setTimeout(function () { if (card.parentNode) card.remove(); }, 15000);
+
+        // ── SweetAlert toast ───────────────────────────────────────────────
+        if (typeof Swal !== 'undefined') {
+            Swal.mixin({
+                toast: true, position: 'top-end',
+                showConfirmButton: false, timer: 7000, timerProgressBar: true
+            }).fire({
+                icon:  isEmergency ? 'warning' : 'info',
+                title: esc(data.title),
+                text:  esc(data.patient_name) + ' — ' + esc(data.appointment_date) + ' ' + esc(data.appointment_time)
+            });
+        }
+
+        // ── Browser desktop notification ───────────────────────────────────
+        if (Notification && Notification.permission === 'granted') {
+            new Notification(data.title, {
+                body: 'Patient: ' + data.patient_name + '\n' + data.appointment_date + ' at ' + data.appointment_time,
+                icon: '/static/icon-192.png'
+            });
+        }
+
+        // ── Beep sound ─────────────────────────────────────────────────────
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = isEmergency ? 880 : 520;
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+            osc.start(); osc.stop(ctx.currentTime + 0.6);
+        } catch (e) { /* audio not available */ }
+    }
+
+    function esc(s) {
+        return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+    }
+
+    // Request desktop notification permission on load
+    if (Notification && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+})();
+</script>
+{% endblock %}

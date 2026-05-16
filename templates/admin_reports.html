@@ -1,0 +1,232 @@
+{% extends "base_clean.html" %}
+{% block title %}Reports & Analytics{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">
+        <i class="fas fa-chart-bar"></i> Reports & Analytics
+    </h2>
+    
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h6>Total Users</h6>
+                    <h2>{{ stats.total_users }}</h2>
+                    <small>All registered users</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h6>Total Patients</h6>
+                    <h2>{{ stats.total_patients }}</h2>
+                    <small>Registered patients</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h6>Total Doctors</h6>
+                    <h2>{{ stats.total_doctors }}</h2>
+                    <small>Registered doctors</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h6>Total Consultations</h6>
+                    <h2>{{ stats.total_consultations }}</h2>
+                    <small>All consultations</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Consultation Status -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Consultation Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Monthly Consultations</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Doctors -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> Top Doctors</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Consultations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in top_doctors %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ loop.index }}</span></td>
+                                <td>{{ doctor.name }}</td>
+                                <td><span class="badge bg-info">{{ doctor.specialization }}</span></td>
+                                <td><strong>{{ doctor.consultation_count }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-heartbeat"></i> Top Symptoms</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Symptom</th>
+                                <th>Frequency</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total = top_symptoms|sum(attribute=1) if top_symptoms else 1 %}
+                            {% for symptom, count in top_symptoms[:10] %}
+                            <tr>
+                                <td><span class="badge bg-warning">{{ loop.index }}</span></td>
+                                <td>{{ symptom|capitalize }}</td>
+                                <td><strong>{{ count }}</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" style="width: {{ (count / total * 100)|round }}%">
+                                            {{ (count / total * 100)|round }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Options -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-download"></i> Export Reports</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('export_users') }}" class="btn btn-primary me-2 mb-2">
+                        <i class="fas fa-users"></i> Export Users (CSV)
+                    </a>
+                    <a href="{{ url_for('export_consultations') }}" class="btn btn-success me-2 mb-2">
+                        <i class="fas fa-stethoscope"></i> Export Consultations (CSV)
+                    </a>
+                    <button class="btn btn-info me-2 mb-2" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Status Pie Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Pending', 'Completed'],
+        datasets: [{
+            data: [{{ stats.pending_consultations }}, {{ stats.completed_consultations }}],
+            backgroundColor: ['#ffc107', '#28a745']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Monthly Line Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in monthly_consultations %}'{{ item.month }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Consultations',
+            data: [{% for item in monthly_consultations %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

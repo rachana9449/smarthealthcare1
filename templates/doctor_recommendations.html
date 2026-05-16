@@ -1,0 +1,163 @@
+<!-- Doctor Recommendations Component -->
+<!-- Add this to prediction_result.html after the prediction results -->
+
+<div class="mt-5" id="doctorRecommendations" style="display: none;">
+    <div class="card shadow-lg">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h4 class="mb-0">
+                <i class="fas fa-user-md"></i> Recommended Doctors for {{ prediction.disease }}
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Recommended Specialization:</strong> <span id="recommendedSpec"></span>
+            </div>
+            
+            <div id="doctorsList" class="row">
+                <!-- Doctors will be loaded here -->
+            </div>
+            
+            <div id="noDoctors" style="display: none;" class="text-center py-5">
+                <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No doctors available for this specialization at the moment.</p>
+                <a href="{{ url_for('consult_doctor') }}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Browse All Doctors
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.doctor-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    background: white;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-color: #667eea;
+}
+
+.doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.rating-stars {
+    color: #f59e0b;
+}
+
+.fee-badge {
+    background: #10b981;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+</style>
+
+<script>
+// Load doctor recommendations
+document.addEventListener('DOMContentLoaded', function() {
+    const disease = "{{ prediction.disease }}";
+    
+    if (disease) {
+        loadDoctorRecommendations(disease);
+    }
+});
+
+function loadDoctorRecommendations(disease) {
+    fetch('/api/recommend-doctors', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ disease: disease })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.doctors && data.doctors.length > 0) {
+            document.getElementById('recommendedSpec').textContent = data.recommended_specialization;
+            displayDoctors(data.doctors);
+            document.getElementById('doctorRecommendations').style.display = 'block';
+        } else {
+            document.getElementById('noDoctors').style.display = 'block';
+            document.getElementById('doctorRecommendations').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading doctors:', error);
+    });
+}
+
+function displayDoctors(doctors) {
+    const doctorsList = document.getElementById('doctorsList');
+    doctorsList.innerHTML = '';
+    
+    doctors.forEach(doctor => {
+        const stars = '★'.repeat(Math.floor(doctor.rating)) + '☆'.repeat(5 - Math.floor(doctor.rating));
+        
+        const doctorCard = `
+            <div class="col-md-6 mb-3">
+                <div class="doctor-card">
+                    <div class="d-flex align-items-start">
+                        <div class="doctor-avatar me-3">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">${doctor.name}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-stethoscope"></i> ${doctor.specialization}
+                            </p>
+                            <p class="mb-2">
+                                <span class="rating-stars">${stars}</span>
+                                <small class="text-muted">(${doctor.reviews} reviews)</small>
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-graduation-cap"></i> ${doctor.qualification} | 
+                                <i class="fas fa-briefcase"></i> ${doctor.experience} years
+                            </p>
+                            <p class="mb-3">
+                                <span class="fee-badge">₹${doctor.fee} / consultation</span>
+                            </p>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" onclick="consultDoctor(${doctor.id})">
+                                    <i class="fas fa-comments"></i> Consult Now
+                                </button>
+                                <button class="btn btn-success btn-sm" onclick="bookAppointment(${doctor.id})">
+                                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        doctorsList.innerHTML += doctorCard;
+    });
+}
+
+function consultDoctor(doctorId) {
+    window.location.href = `/patient/consultation/${doctorId}`;
+}
+
+function bookAppointment(doctorId) {
+    window.location.href = `/patient/book-appointment/${doctorId}`;
+}
+</script>

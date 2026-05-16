@@ -1,0 +1,92 @@
+{% extends "base_clean.html" %}
+{% block title %}Payment Failed - SmartCare{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: #f0f2f8 !important; }
+.failed-wrap { padding: 60px 0; }
+.failed-card {
+  background: #fff; border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(239,68,68,.12);
+  max-width: 560px; margin: 0 auto; overflow: hidden;
+}
+.failed-header {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  padding: 40px 32px; text-align: center; color: #fff;
+}
+.x-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  animation: shake .5s ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
+}
+.failed-header h2 { font-weight: 800; font-size: 1.6rem; margin-bottom: 6px; }
+.failed-header p  { opacity: .9; font-size: .95rem; margin: 0; }
+.failed-body { padding: 32px; text-align: center; }
+.reason-box {
+  background: #fff5f5; border: 1px solid #fecaca;
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+  font-size: .9rem; color: #dc2626;
+}
+.btn-retry {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 28px; font-weight: 700; font-size: .95rem;
+  text-decoration: none; margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(102,126,234,.4);
+  transition: opacity .2s;
+}
+.btn-retry:hover { opacity: .88; color: #fff; }
+.btn-home {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #f1f5f9; color: #475569;
+  border: none; border-radius: 12px;
+  padding: 13px 28px; font-weight: 700; font-size: .95rem;
+  text-decoration: none; margin-left: 12px;
+  transition: background .2s;
+}
+.btn-home:hover { background: #e2e8f0; color: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="failed-wrap">
+<div class="container">
+  <div class="failed-card">
+    <div class="failed-header">
+      <div class="x-circle">
+        <i class="fas fa-times" style="font-size:2rem;"></i>
+      </div>
+      <h2>Payment Failed</h2>
+      <p>Your payment could not be processed. No amount was deducted.</p>
+    </div>
+    <div class="failed-body">
+      <div class="reason-box">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        The payment was cancelled or an error occurred. Please try again.
+      </div>
+      <p style="color:#64748b;font-size:.9rem;margin-bottom:24px;">
+        If any amount was deducted, it will be automatically refunded within 5-7 business days.
+      </p>
+      <div>
+        <a href="{{ url_for('payment.checkout', appointment_id=appointment_id) }}" class="btn-retry">
+          <i class="fas fa-redo"></i> Try Again
+        </a>
+        <a href="{{ url_for('patient_dashboard') }}" class="btn-home">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+      <div style="margin-top:20px;font-size:.82rem;color:#94a3b8;">
+        Need help? Contact <a href="mailto:support@smartcare.health" style="color:#667eea;">support@smartcare.health</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}

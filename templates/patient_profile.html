@@ -1,0 +1,65 @@
+{% extends "base_clean.html" %}
+{% block title %}Patient Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4" style="color: #333;">
+        <i class="fas fa-user-circle"></i> Patient Profile
+    </h2>
+    
+    <div class="card shadow-lg">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h4 class="mb-0"><i class="fas fa-id-card"></i> Personal Information</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    <div class="bg-light rounded-circle p-5 d-inline-block mb-3" style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user fa-5x text-primary"></i>
+                    </div>
+                    <h5 class="badge bg-info p-2" style="font-size: 16px;">Patient</h5>
+                </div>
+                <div class="col-md-9">
+                    <table class="table table-borderless table-striped">
+                        <tbody>
+                            <tr>
+                                <td width="35%" class="fw-bold"><i class="fas fa-user text-primary"></i> Patient name:</td>
+                                <td>{{ user.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-envelope text-primary"></i> Email:</td>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-phone text-primary"></i> Phone:</td>
+                                <td>{{ user.phone }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-calendar text-primary"></i> Age:</td>
+                                <td>{{ user.age }} years</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-venus-mars text-primary"></i> Gender:</td>
+                                <td>{{ user.gender }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-tint text-primary"></i> Blood Group:</td>
+                                <td>{{ patient.blood_group if patient.blood_group else 'Not specified' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold"><i class="fas fa-map-marker-alt text-primary"></i> Address:</td>
+                                <td>{{ user.address }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

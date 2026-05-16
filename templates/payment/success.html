@@ -1,0 +1,236 @@
+{% extends "base_clean.html" %}
+{% block title %}Payment Successful - SmartCare{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: #f0f2f8 !important; }
+.success-wrap { padding: 48px 0 60px; }
+
+.success-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 40px rgba(16,185,129,.15);
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.success-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 40px 32px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.success-header::before {
+  content:''; position:absolute; right:-60px; top:-60px;
+  width:200px; height:200px; background:rgba(255,255,255,.08); border-radius:50%;
+}
+.checkmark-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  animation: popIn .5s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-header h2 { font-weight: 800; font-size: 1.6rem; margin-bottom: 6px; }
+.success-header p  { opacity: .9; font-size: .95rem; margin: 0; }
+
+.receipt-body { padding: 32px; }
+
+.receipt-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+  font-size: .9rem;
+}
+.receipt-row:last-child { border-bottom: none; }
+.receipt-row .rl { color: #64748b; }
+.receipt-row .rv { font-weight: 700; color: #1e293b; }
+
+.receipt-number {
+  background: linear-gradient(135deg, #f0f4ff, #e8edff);
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.receipt-number .label { font-size: .72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .6px; }
+.receipt-number .value { font-size: 1.3rem; font-weight: 800; color: #667eea; letter-spacing: 1px; }
+
+.video-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: #fff;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.video-icon { font-size: 2rem; flex-shrink: 0; }
+.video-info .title { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+.video-info .sub   { font-size: .82rem; opacity: .88; }
+.btn-join {
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.4);
+  color: #fff; border-radius: 10px;
+  padding: 10px 20px; font-weight: 700; font-size: .85rem;
+  text-decoration: none; white-space: nowrap;
+  transition: background .2s;
+  margin-left: auto;
+}
+.btn-join:hover { background: rgba(255,255,255,.3); color: #fff; }
+
+.action-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-receipt {
+  flex: 1; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 20px; font-weight: 700; font-size: .9rem;
+  text-decoration: none; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(102,126,234,.4);
+  transition: opacity .2s;
+}
+.btn-receipt:hover { opacity: .88; color: #fff; }
+.btn-dashboard {
+  flex: 1; background: #f1f5f9; color: #475569;
+  border: none; border-radius: 12px;
+  padding: 13px 20px; font-weight: 700; font-size: .9rem;
+  text-decoration: none; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background .2s;
+}
+.btn-dashboard:hover { background: #e2e8f0; color: #1e293b; }
+
+.confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-wrap">
+<div class="container">
+
+  <div class="success-card">
+    <!-- Header -->
+    <div class="success-header">
+      <div class="checkmark-circle">
+        <i class="fas fa-check" style="font-size:2rem;"></i>
+      </div>
+      <h2>Payment Successful!</h2>
+      <p>Your appointment has been confirmed. A confirmation email has been sent.</p>
+    </div>
+
+    <!-- Body -->
+    <div class="receipt-body">
+
+      <!-- Receipt Number -->
+      <div class="receipt-number">
+        <div class="label">Receipt Number</div>
+        <div class="value">{{ row.receipt_number }}</div>
+      </div>
+
+      <!-- Video Link (if online) -->
+      {% if video_link %}
+      <div class="video-card">
+        <div class="video-icon">🎥</div>
+        <div class="video-info">
+          <div class="title">Video Consultation Ready</div>
+          <div class="sub">Join your consultation at the scheduled time</div>
+        </div>
+        <a href="{{ video_link }}" target="_blank" class="btn-join">
+          <i class="fas fa-video me-1"></i> Join Now
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Details -->
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-user-md me-2" style="color:#667eea;"></i>Doctor</span>
+        <span class="rv">Dr. {{ row.doctor_name }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-stethoscope me-2" style="color:#667eea;"></i>Specialization</span>
+        <span class="rv">{{ row.specialization }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-calendar me-2" style="color:#667eea;"></i>Date</span>
+        <span class="rv">{{ row.appointment_date }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-clock me-2" style="color:#667eea;"></i>Time</span>
+        <span class="rv">{{ row.appointment_time }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-laptop-medical me-2" style="color:#667eea;"></i>Mode</span>
+        <span class="rv">{{ (row.mode or 'online')|capitalize }}</span>
+      </div>
+      {% if row.discount_amount and row.discount_amount > 0 %}
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-tag me-2" style="color:#10b981;"></i>Discount</span>
+        <span class="rv" style="color:#10b981;">-₹{{ "%.2f"|format(row.discount_amount) }}</span>
+      </div>
+      {% endif %}
+      <div class="receipt-row" style="border-top:2px solid #f1f5f9;margin-top:8px;padding-top:14px;">
+        <span class="rl" style="font-weight:800;color:#1e293b;font-size:1rem;">Amount Paid</span>
+        <span class="rv" style="font-size:1.2rem;color:#10b981;">₹{{ "%.2f"|format(row.final_amount) }}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="rl"><i class="fas fa-check-circle me-2" style="color:#10b981;"></i>Status</span>
+        <span style="background:#d1fae5;color:#059669;border-radius:20px;padding:4px 14px;font-size:.78rem;font-weight:700;">PAID</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-btns mt-4">
+        <a href="{{ url_for('payment.download_receipt', payment_id=row.id) }}" class="btn-receipt">
+          <i class="fas fa-download"></i> Download Receipt
+        </a>
+        <a href="{{ url_for('patient_dashboard') }}" class="btn-dashboard">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+
+      <div style="text-align:center;margin-top:16px;">
+        <a href="{{ url_for('payment.history') }}" style="color:#667eea;font-size:.85rem;text-decoration:none;">
+          <i class="fas fa-history me-1"></i> View Payment History
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// Confetti animation
+(function() {
+  var colors = ['#667eea','#764ba2','#10b981','#f59e0b','#ef4444','#06b6d4'];
+  var container = document.createElement('div');
+  container.className = 'confetti';
+  document.body.appendChild(container);
+  for (var i = 0; i < 60; i++) {
+    (function(i) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        el.style.cssText = 'position:absolute;width:10px;height:10px;border-radius:2px;' +
+          'background:' + color + ';left:' + (Math.random()*100) + '%;top:-20px;' +
+          'animation:fall ' + (Math.random()*2+2) + 's linear forwards;opacity:.9;' +
+          'transform:rotate(' + (Math.random()*360) + 'deg);';
+        container.appendChild(el);
+        setTimeout(function() { if (el.parentNode) el.remove(); }, 4000);
+      }, i * 60);
+    })(i);
+  }
+  var s = document.createElement('style');
+  s.textContent = '@keyframes fall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}';
+  document.head.appendChild(s);
+  setTimeout(function() { if (container.parentNode) container.remove(); }, 5000);
+})();
+</script>
+{% endblock %}
